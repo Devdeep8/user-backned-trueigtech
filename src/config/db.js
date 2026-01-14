@@ -1,0 +1,20 @@
+// src/config/database.js
+import { Sequelize } from "sequelize";
+
+// Docker Connection String:
+// Protocol: postgres
+// User: admin
+// Pass: admin
+// Host: db (This is the name from docker-compose.yml)
+// DB Name: userdb
+export const sequelize = new Sequelize('postgres://admin:admin@localhost:5432/userdb') // Example for postgres
+
+// Function to test the connection
+export const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Connection to PostgreSQL has been established successfully.');
+  } catch (error) {
+    console.error('❌ Unable to connect to the database:', error);
+  }
+};
