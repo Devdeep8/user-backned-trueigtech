@@ -18,7 +18,7 @@ export const connectRabbitMQ = async () => {
 
     await channel.assertQueue(queueName);
     console.log(
-      '✅ Connected to RabbitMQ and Queue "user_operations" is ready.'
+      '✅ Connected to RabbitMQ and Queue "user_connection" is ready.'
     );
   } catch (error) {
     console.error("❌ RabbitMQ Connection Error:", error);
