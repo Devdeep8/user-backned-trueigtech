@@ -1,9 +1,15 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/db";
+import { sequelize } from "../config/db.js";
 
-const User = sequelize.define(
+export const User = sequelize.define(
   "User",
   {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4, // <--- USE THIS (Generates a random UUID)
+      primaryKey: true,
+      allowNull: false,
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -30,10 +36,3 @@ const User = sequelize.define(
     tableName: "users",
   }
 );
-
-async () => {
-  await sequelize.sync({ force: true });
-};
-console.log(User === sequelize.models.User); // true
-
-export default User;
