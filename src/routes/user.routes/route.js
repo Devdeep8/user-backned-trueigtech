@@ -1,56 +1,59 @@
 // routes/userRoutes.js
 import express from "express";
-import { getChannel, queueName } from "../../config/rabbitmq.js";
-import { toJson } from "../../helper/json.convertor.js";
-import { User } from "../../model/user.model.js";
+import userService from "../../user-service/user.service.js";
+import { v4 as uuidv4 } from "uuid";
+
 export const userRouter = express.Router();
 
 // POST /create - Create a new user
 userRouter.post("/create", async (req, res) => {
   const { name, email, password, role } = req.body;
-
-  // Basic Validation
-  if (!name || !email) {
-    return res.status(400).json({ message: "Name and Email are required" });
-  }
+  const userId = uuidv4();
 
   try {
-    // If RabbitMQ isn't connected yet
-    const channel = getChannel();
-
-    if (!channel) {
-      return res.status(503).json({ message: "Rebbit mq is connected" });
-    }
-
-    const message = toJson({
-      action: "create", // <--- This tells the worker to INSERT
-      data: { name, email, password, role },
+    const user = await userService.createUser({
+      id: userId,
+      name,
+      email,
+      password,
+      role,
     });
-    // Send data to Queue
-
-    console.log(message);
-
-    channel.sendToQueue(queueName, Buffer.from(message));
-
-    console.log(`✅ Sent ${name} to queue: ${queueName}`);
 
     res.status(202).json({
-      message: "User request queued",
-      data: message,
+      message: "User registration accepted",
+      status: "QUEUED_FOR_PROCESSING",
+      userId,
     });
   } catch (error) {
     console.error("[Route Error]", error);
-    res.status(500).json({ message: "Error processing request" });
+    res.status(500).json({ message: "Failed to queue user" });
   }
 });
 
+userRouter.get("/all-users", async (req, res) => {
+  try {
+    const users = await userService.getUser();
 
-userRouter.get("/all-users" , async(req , res) => {
-    try {
-        const user = await User.findAll({
-    
-        })
-    } catch (error) {
-        
-    }
-})
+    res.status(200).json({
+      total: users.length,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+userRouter.delete("/delete/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+  try {
+    await userService.deleteUser(userId)
+  } catch (error) {
+    console.error("Delete Route Error:", error);
+    res.status(500).json({ message: "Error queuing deletion" });
+  }
+});
