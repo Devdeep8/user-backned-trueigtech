@@ -28,6 +28,14 @@ export const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    refreshToken: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    refreshTokenExpiresAt: {
+      type: DataTypes.DATE, // Track expiry
+      allowNull: true,
+    },
   },
   {
     timestamps: true,
