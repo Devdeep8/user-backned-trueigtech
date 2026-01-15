@@ -1,4 +1,5 @@
 import gameService from "../services/game.service.js";
+import AppError from "../utils/appError.js";
 
 class GameController {
   async createGame(req, res, next) {
@@ -16,11 +17,12 @@ class GameController {
   async toggleActive(req, res, next) {
     try {
       const { gameId } = req.body;
-      if (!gameId) {
-        return res.status(400).json({
+      if (!gameId || !req.user.role) {
+        res.status(400).json({
           success: false,
           message: "Game ID is required",
         });
+        throw new AppError("Game ID or role is missing", 400);
       }
       const result = await gameService.toggleActive({ gameId, role: req.role });
       return res.status(200).json({
@@ -30,7 +32,7 @@ class GameController {
         game: result,
       });
     } catch (error) {
-        next(error)
+      next(error);
     }
   }
 
