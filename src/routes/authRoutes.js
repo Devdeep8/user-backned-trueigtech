@@ -8,8 +8,9 @@ const authRoutes = express.Router();
 
 // Public routes
 authRoutes.post('/register', authController.register);
-// authRoutes.post('/login', authController.login);
+authRoutes.post('/login', authController.login);
 authRoutes.post('/refresh', authController.refresh);
+authRoutes.get("/me", authMiddleware.authenticate, authController.me);
 
 // Protected routes
 authRoutes.post('/logout', authMiddleware.authenticate, authController.logout );
