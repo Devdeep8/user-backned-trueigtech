@@ -1,0 +1,79 @@
+import gameService from "../services/game.service.js";
+
+class GameController {
+  async createGame(req, res, next) {
+    try {
+    } catch (error) {}
+  }
+  async deleteGame(req, res, next) {
+    try {
+    } catch (error) {}
+  }
+  async updateGame(req, res, next) {
+    try {
+    } catch (error) {}
+  }
+  async toggleActive(req, res, next) {
+    try {
+      const { gameId } = req.body;
+      if (!gameId) {
+        return res.status(400).json({
+          success: false,
+          message: "Game ID is required",
+        });
+      }
+      const result = await gameService.toggleActive({ gameId, role: req.role });
+      return res.status(200).json({
+        success: true,
+        message: "Game toggled successfully",
+
+        game: result,
+      });
+    } catch (error) {
+        next(error)
+    }
+  }
+
+  async bulkUpload(req, res, next) {
+    try {
+      const file = req.file;
+      console.log(file);
+      if (!file) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No file uploaded" });
+      }
+      const uplaodGames = await gameService.bulkUpload(file);
+      return res.status(200).json({
+        success: true,
+        message: "Games uploaded successfully",
+        data: {
+          uplaodGames,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async showAllGames(req, res, next) {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const result = await gameService.showAllGames({
+        role: req.user.role,
+        page,
+        limit,
+      });
+      return res.status(200).json({
+        success: true,
+        message: "Games retrieved successfully",
+        ...result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export default new GameController();

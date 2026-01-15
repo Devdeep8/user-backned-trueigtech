@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
 import { connectDB } from './config/db.js';
 import { userRouter } from './routes/user.routes/route.js';
+import gameRoutes from './routes/gameRoutes.js';
+
 const app = express();
 const PORT = process.env.PORT || 6001;
 
@@ -19,6 +21,7 @@ app.use(cors({
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/game', gameRoutes);
 app.use('/api/user' , userRouter)
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });

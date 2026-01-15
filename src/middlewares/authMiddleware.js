@@ -7,7 +7,6 @@ class AuthMiddleware {
     try {
       // 🔥 Read token from cookies (NOT headers)
       const token = req.cookies.accessToken;
-      console.log(token);
 
       if (!token) {
         throw new AppError("Unauthorized", 401);
@@ -20,7 +19,6 @@ class AuthMiddleware {
         role: decoded.role,
       };
 
-      console.log(req.user);
 
       next();
     } catch (error) {

@@ -1,8 +1,7 @@
 // models/Game.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db.js'); // Your DB connection
-
-export const Game = sequelize.define('Game', {
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js';
+export const Games = sequelize.define('Game', {
     // 1. ID (handled by Sequelize by default, but explicit here)
     id: {
         type: DataTypes.UUID,
