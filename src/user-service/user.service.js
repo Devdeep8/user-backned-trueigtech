@@ -1,6 +1,5 @@
 // src/services/userService.js
 import EventEmitter from "events";
-import { v4 as uuidv4 } from "uuid";
 import messageQueueClient from "./messageQueueClient.js";
 import { User } from "../model/user.model.js";
 
@@ -11,6 +10,11 @@ class UserService extends EventEmitter {
     this.on("userCreatedInternal", (user) => {
       console.log(
         `🔕 [Service Internal Log]: User ${user.name} validated locally.`
+      );
+    });
+    this.on("userDeletion", (deletedUser) => {
+      console.log(
+        `🔕 [Service Internal Log]: User ${deletedUser.id} validated locally.`
       );
     });
   }
@@ -24,10 +28,8 @@ class UserService extends EventEmitter {
 
   async createUser(userData) {
     // 1. Generate Mock ID
-    const userId = uuidv4();
 
     const user = {
-      id: userId,
       createdAt: new Date(),
       ...userData,
     };
@@ -58,12 +60,35 @@ class UserService extends EventEmitter {
   async updateUser(userId, updates) {
     const updatedUser = { id: userId, ...updates, updatedAt: new Date() };
 
-    await messageQueueClient.publish("user_operations", {
-      type: "UserUpdated",
-      payload: updatedUser,
-    });
+    this.emit("userUpdatedInternal", updatedUser);
+    try {
+      await messageQueueClient.publish("user_operations", {
+        type: "UserUpdated",
+        payload: updatedUser,
+      });
+      this.emit("userPublished", updatedUser);
+    } catch (error) {
+      this.emit("errorPublishing", error);
+      throw error;
+    }
 
     return updatedUser;
+  }
+
+  async deleteUser(userId) {
+    const deletedUser = { id: userId };
+    // this.emit("userDeletion", deletedUser);
+
+    try {
+      await messageQueueClient.publish("user_operations", {
+        type: "UserDelete",
+        payload: deletedUser,
+      });
+      this.emit("userDeletion", deletedUser);
+    } catch (error) {
+      this.emit("errorPublishing", error);
+      throw error;
+    }
   }
 
   async getUser() {

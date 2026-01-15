@@ -30,7 +30,6 @@ const startWorker = async () => {
       if (!msg) return;
       const { type, payload } = JSON.parse(msg.content.toString());
       console.log(`📨 Worker Processing: ${type} (${payload.id})`);
-      const retryCount = parseInt(msg.properties.headers["x-retry-count"] || 0);
 
       try {
         // Use Handler Map

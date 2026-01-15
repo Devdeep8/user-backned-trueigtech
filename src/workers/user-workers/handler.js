@@ -17,7 +17,15 @@ export const handleUserUpdated = async (data) => {
   await User.update(data, { where: { id: data.id } });
 };
 
+export const handleUserDeleted = async (data) => {
+  await User.destroy({
+    where : {
+      id: data.id
+    }
+  })
+}
 export const userEventHandlers = {
   'UserCreated': handleUserCreated,
   'UserUpdated': handleUserUpdated,
+  'UserDelete' : handleUserDeleted,
 };
