@@ -59,18 +59,13 @@ class GameController {
   async bulkUpload(req, res, next) {
     try {
       const file = req.file;
-      console.log(file);
-      if (!file) {
-        return res
-          .status(400)
-          .json({ success: false, message: "No file uploaded" });
-      }
-      const uplaodGames = await gameService.bulkUpload(file);
+      const {successful , failed} = await gameService.bulkUpload(file);
       return res.status(200).json({
         success: true,
         message: "Games uploaded successfully",
         data: {
-          uplaodGames,
+          successful,
+          failed,
         },
       });
     } catch (error) {

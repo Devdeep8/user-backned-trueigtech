@@ -1,9 +1,0 @@
-name,description,genre,imageUrl,gameUrl,isActive
-"Galactic Defender","Save the galaxy from waves of alien invaders in this classic arcade shooter.","Action","https://example.com/images/galactic.jpg","https://example.com/games/galactic",true
-"Mystic Woods RPG","Explore a vast open world, collect loot, and defeat the dragon.","RPG","https://example.com/images/mystic.jpg","https://example.com/games/mystic",true
-"Speed Racer 3000","High-octane racing simulation with realistic physics.","Racing","https://example.com/images/speed.jpg","https://example.com/games/speed",true
-"Brain Teaser Daily","Test your IQ with a new logic puzzle every day.","Puzzle","https://example.com/images/brain.jpg","https://example.com/games/brain",true
-"Soccer Stars League","Build your dream team and compete in the world cup.","Sports","https://example.com/images/soccer.jpg","https://example.com/games/soccer",true
-"Space Invaders Classic","The original retro arcade experience.","Arcade","https://example.com/images/invaders.jpg","https://example.com/games/invaders",true
-"Chess Grandmaster","Play against AI or friends in this timeless strategy game.","Strategy","https://example.com/images/chess.jpg","https://example.com/games/chess",true
-"Zombie Survival","How long can you last against the horde?","Horror","https://example.com/images/zombie.jpg","https://example.com/games/zombie",false

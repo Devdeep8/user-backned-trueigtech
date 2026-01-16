@@ -1,15 +1,22 @@
 import AppError from "../utils/appError.js";
 import { Games } from "../model/game.model.js";
+import * as gameDbops from "../dbOperation/game.repository.js";
 import csvParser from "csv-parser";
 import fs from "fs";
 
 class GameService {
-  async deleteGame(gameId) {
-    if (!gameId){
-        throw new AppError("Game Id is not defined", 400)
+  async createGame(data) {
+    if (!data.name) throw new AppError("Game name is required", 400);
+    try {
+      return await gameDbops.createGameRecord(data);
+    } catch (err) {
+      throw new AppError(err.message || "Failed to create game", 500);
     }
-    const softDelete = await Games.update({deletedAt: new Date()},{where:{id:gameId}})
-    return softDelete
+  }
+
+  async deleteGame(gameId) {
+    if (!gameId) throw new AppError("Game ID is required", 400);
+    return await gameDbops.softDeleteGame(gameId);
   }
   async updateGame({ data, id }) {
     if (!id || !data) {
@@ -37,7 +44,7 @@ class GameService {
 
     return await Games.findByPk(id);
   }
-  async toggleActive({ gameId, role }) {
+  async toggleActive({ gameId }) {
     if (!gameId) {
       throw new AppError("Game ID is required", 400);
     }
@@ -54,47 +61,83 @@ class GameService {
     }
   }
   async bulkUpload(file) {
+    if (!file) throw new AppError("No file uploaded", 400);
+
     const games = [];
 
-    fs.createReadStream(file.path)
-      .pipe(csvParser())
-      .on("data", (data) => {
-        games.push({
-          name: data.name || null,
-          description: data.description || null,
-          genre: data.genre || null,
-          imageUrl: data.imageUrl || null,
-          gameUrl: data.gameUrl || null,
-          isActive: data.isActive === "true" || data.isActive === true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          deletedAt: null,
-        });
-      })
-      .on("end", async () => {
+    // 1️⃣ Read CSV into array
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(file.path)
+        .pipe(csvParser())
+        .on("data", (data) => {
+          games.push({
+            name: data.name || null,
+            description: data.description || null,
+            genre: data.genre || null,
+            imageUrl: data.imageUrl || null,
+            gameUrl: data.gameUrl || null,
+            isActive: data.isActive === "true" || data.isActive === true,
+          });
+        })
+        .on("end", resolve)
+        .on("error", (err) => reject(new AppError("Failed to parse CSV", 500)));
+    });
+
+    if (games.length === 0) {
+      await fs.promises.unlink(file.path);
+      throw new AppError("CSV file is empty", 400);
+    }
+
+    const successful = [];
+    const failed = [];
+
+    try {
+      if (games.length > 600) {
+        // 🔹 Large file → bulkCreate for speed
         try {
           const uploadedGames = await Games.bulkCreate(games, {
             validate: true,
           });
-
-          // ✅ delete file after successful upload
-          await fs.promises.unlink(file.path);
-
-          return uploadedGames;
-        } catch (err) {
-          // delete file even if DB fails
-          await fs.promises.unlink(file.path);
-          throw new AppError("Failed to upload games", 500);
+          successful.push(...uploadedGames);
+        } catch (bulkErr) {
+          // If bulkCreate fails, all rows fail, log error
+          games.forEach((g, idx) =>
+            failed.push({ row: idx + 1, data: g, error: bulkErr.message })
+          );
         }
-      })
-      .on("error", async (error) => {
-        console.error("Error parsing CSV:", error);
+      } else {
+        // 🔹 Small/medium file → batch + Promise.allSettled
+        const batchSize = 100;
+        for (let i = 0; i < games.length; i += batchSize) {
+          const batch = games.slice(i, i + batchSize);
 
-        // delete file on parsing error
+          const results = await Promise.allSettled(
+            batch.map((game) => this.createGame(game))
+          );
+
+          results.forEach((res, index) => {
+            if (res.status === "fulfilled") successful.push(res.value);
+            else
+              failed.push({
+                row: i + index + 1,
+                data: batch[index],
+                error: res.reason.message || "Unknown error",
+              });
+          });
+        }
+      }
+
+      return { successful, failed };
+    } catch (err) {
+      throw new AppError(err.message || "Bulk upload failed", 500);
+    } finally {
+      // ✅ Always delete the file
+      try {
         await fs.promises.unlink(file.path);
-
-        throw new AppError("Failed to parse CSV file", 500);
-      });
+      } catch (unlinkErr) {
+        console.error("Failed to delete CSV file:", unlinkErr);
+      }
+    }
   }
   async showAllGames({ role, page, limit }) {
     console.log(role);
