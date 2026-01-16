@@ -7,21 +7,42 @@ class GameController {
     } catch (error) {}
   }
   async deleteGame(req, res, next) {
+    const { gameId } = req.body;
     try {
-    } catch (error) {}
+      const result = await gameService.deleteGame(gameId);
+      return res.status(200).json({
+        success: true,
+        message: "Game deleted successfully",
+        data: {
+          game: result,
+        },
+      });
+    } catch (error) {
+      console.error("Delete Game Error:", error.message || error);
+
+      next(error);
+    }
   }
   async updateGame(req, res, next) {
     try {
-    } catch (error) {}
+      const { id } = req.params;
+      const { data } = req.body;
+      const result = await gameService.updateGame({ data, id });
+      return res.status(200).json({
+        success: true,
+        message: "Game updated successfully",
+        data: {
+          game: result,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
   }
   async toggleActive(req, res, next) {
     try {
       const { gameId } = req.body;
       if (!gameId || !req.user.role) {
-        res.status(400).json({
-          success: false,
-          message: "Game ID is required",
-        });
         throw new AppError("Game ID or role is missing", 400);
       }
       const result = await gameService.toggleActive({ gameId, role: req.role });
@@ -35,7 +56,6 @@ class GameController {
       next(error);
     }
   }
-
   async bulkUpload(req, res, next) {
     try {
       const file = req.file;

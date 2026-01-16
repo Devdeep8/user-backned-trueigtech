@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import { connectDB } from './config/db.js';
 import { userRouter } from './routes/user.routes/route.js';
 import gameRoutes from './routes/gameRoutes.js';
+import errorHandler from './middlewares/errormiddleware.js';
 
 const app = express();
 const PORT = process.env.PORT || 6001;
@@ -27,7 +28,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
 });
 
-
+app.use(errorHandler)
 // ✅ Connect to DB first, then start server
 const startServer = async () => {
   await connectDB();

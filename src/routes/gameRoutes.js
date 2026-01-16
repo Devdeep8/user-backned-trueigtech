@@ -7,8 +7,8 @@ const gameRoutes = express.Router();
 
 // Public routes
 gameRoutes.post("/create", gameController.createGame);
-gameRoutes.post("/delete", gameController.deleteGame);
-gameRoutes.post("/update", gameController.updateGame);
+gameRoutes.delete("/delete", gameController.deleteGame);
+gameRoutes.put("/update/:id", gameController.updateGame);
 gameRoutes.post(
   "/bulkupload",
   authMiddleware.authenticate,
