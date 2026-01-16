@@ -13,10 +13,11 @@ export async function updateGameById(id, data) {
   const [affectedRows] = await Games.update(data, { where: { id } });
   return affectedRows;
 }
-
-export async function findGameById(id) {
-  return await Games.findByPk(id);
+export async function toggleActive(id) {
+  const [affectedRows] = await Games.update({ isActive: !Games.isActive }, { where: { id } });
+  return affectedRows;
 }
+
 
 export async function softDeleteGame(id) {
   return await Games.update({ deletedAt: new Date() }, { where: { id } });

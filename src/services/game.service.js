@@ -23,24 +23,10 @@ class GameService {
       throw new AppError("gameId required and data also", 400);
     }
 
-    const { name, description, genre, imageUrl, gameUrl, isActive } = data;
-    const [affectedRows] = await Games.update(
-      {
-        name,
-        description,
-        genre,
-        imageUrl,
-        gameUrl,
-        isActive,
-      },
-      {
-        where: { id },
-      }
-    );
+    const result = await gameDbops.updateGameById(id, data);
 
-    if (affectedRows === 0) {
-      throw new AppError("Game not found", 404);
-    }
+    console.log(result);
+    if (!affected) throw new AppError("Game not found", 404);
 
     return await Games.findByPk(id);
   }
@@ -49,12 +35,10 @@ class GameService {
       throw new AppError("Game ID is required", 400);
     }
     try {
-      const game = await Games.findByPk(gameId);
+      const game = await gameDbops.toggleActive(gameId);
       if (!game) {
         throw new AppError("Game not found", 404);
       }
-      game.isActive = !game.isActive;
-      await game.save();
       return game;
     } catch (error) {
       throw error;
