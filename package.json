@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "worker": "nodemon src/workers/user.worker.js",
+    "worker": "nodemon src/workers/user-workers/user.worker.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,13 +16,20 @@
   "packageManager": "pnpm@10.23.0",
   "dependencies": {
     "amqplib": "^0.10.9",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
     "pg": "^8.16.3",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "sequelize-cli": "^6.6.5"
   }
 }
