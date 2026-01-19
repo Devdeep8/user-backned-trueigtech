@@ -12,7 +12,7 @@ class UserService {
     const user = await User.findByPk(id);
 
     if (!user) {
-      throw new AppError("User not found", 404);
+      throw new AppError("User not found", 404 );
     }
 
     // 2️⃣ If role is being updated
@@ -35,7 +35,6 @@ class UserService {
     // 5️⃣ Return updated user
     return await User.findByPk(id);
   }
-
   async deleteUser(id) {
     return await User.update({ deletedAt: new Date() }, { where: { id } });
   }

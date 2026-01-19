@@ -37,6 +37,8 @@ userRouter.get("/all-users", async (req, res) => {
     res.status(200).json({
       total: users.length,
       data: users,
+      status: "OK",
+      message: "Users fetched successfully",
     });
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -57,3 +59,61 @@ userRouter.delete("/delete/:userId", async (req, res) => {
     res.status(500).json({ message: "Error queuing deletion" });
   }
 });
+
+import crypto from "crypto";
+import AppError from "../../utils/appError.js";
+
+userRouter.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      throw new AppError("User ID is required", 400 , false)
+    }
+
+    const user = await userService.getUserById(id);
+
+    if (!user) {
+      throw new AppError("User not found", 404 , false)
+    }
+
+    // 🔹 Create ETag from user data
+    const etag = crypto
+      .createHash("sha1")
+      .update(JSON.stringify(user))
+      .digest("hex");
+
+    // 🔹 Compare with browser cache
+    if (req.headers["if-none-match"] === etag) {
+      console.log("🟡 Cache HIT → 304");
+      return res.status(304).json({
+        status: "OK",
+        data: user,
+        message: "User fetched successfully",
+      });
+    }
+
+    console.log("🟢 Cache MISS → 200");
+
+    // 🔹 Set cache headers
+    res.setHeader("ETag", etag);
+    res.setHeader("Cache-Control", "private, max-age=60"); // 60 seconds
+    res.setHeader("Vary", "Accept-Language");
+
+    res.status(200).json({
+      status: "OK",
+      data: user,
+      message: "User fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching user by id:", error);
+    res.status(500).json({
+      status: "ERROR",
+      message: "Internal Server Error",
+    });
+  }
+});
+
+
+
+

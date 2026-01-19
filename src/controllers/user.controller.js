@@ -1,4 +1,5 @@
 import userService from "../services/users.service.js";
+import authService from "../services/auth.service.js";
 import AppError from "../utils/appError.js";
 
 class UserController {
@@ -94,6 +95,23 @@ class UserController {
         success: true,
         message: "User status toggled successfully",
         data: { user },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async forceLogout(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      if (!id) throw new AppError("User ID is required", 400);
+
+      await authService.logout(id);
+
+      res.status(200).json({
+        success: true,
+        message: "User force logged out successfully",
       });
     } catch (error) {
       next(error);

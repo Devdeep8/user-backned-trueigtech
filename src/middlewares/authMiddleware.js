@@ -1,9 +1,10 @@
 // middlewares/authMiddleware.js
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
+import { User } from "../model/user.model.js";
 
 class AuthMiddleware {
-  authenticate(req, res, next) {
+  async authenticate(req, res, next) {
     try {
       // 🔥 Read token from cookies (NOT headers)
       const token = req.cookies.accessToken;
@@ -14,11 +15,29 @@ class AuthMiddleware {
 
       const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
-      req.user = {
-        userId: decoded.userId,
-        role: decoded.role,
-      };
+      // INSTANT CHECK: Validate against DB
+      const user = await User.findByPk(decoded.userId);
 
+      if (!user) {
+        throw new AppError("User no longer exists", 401);
+      }
+
+      if (!user.isActive) {
+        throw new AppError("User account is suspended", 401);
+      }
+
+      // Optional: Check if role changed
+      if (user.role !== decoded.role) {
+        // Role changed, force refresh to get new token
+        throw new AppError("Role changed, please login again", 401);
+      }
+
+      // Attach user to request
+      req.user = {
+        userId: user.id,
+        role: user.role,
+        email: user.email,
+      };
 
       next();
     } catch (error) {

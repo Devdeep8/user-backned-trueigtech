@@ -97,6 +97,16 @@ class UserService extends EventEmitter {
     });
     return users;
   }
+   async getUserById(id) {
+  return await User.findOne({
+    where: {
+      id,
+      deletedAt: null,
+    },
+  });
+};
 }
+
+
 
 export default new UserService();
