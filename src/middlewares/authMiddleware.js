@@ -38,6 +38,7 @@ class AuthMiddleware {
         userId: user.id,
         role: user.userRole.name,
         email: user.email,
+        permissions: user.userRole.permissions.map((p) => p.key),
       };
 
       next();
@@ -51,7 +52,7 @@ class AuthMiddleware {
   }
 
   isAdmin(req, res, next) {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "super_admin") {
       return next(new AppError("Admin access required", 403));
     }
     next();
@@ -63,6 +64,40 @@ class AuthMiddleware {
     }
     next();
   }
+
+  authorize ({ roles = [], permissions = [] }) {
+  return (req, res, next) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new AppError("Unauthorized", 401));
+    }
+
+    const userRole = user.role;
+    const userPermissions = user?.permissions || [];
+
+    console.log(userRole, userPermissions);
+    // 1️⃣ Role check
+    if (roles.length && !roles.includes(userRole)) {
+      return next(
+        new AppError("You do not have the required role", 403)
+      );
+    }
+
+    // 2️⃣ Permission check
+    if (
+      permissions.length &&
+      !permissions.every((p) => userPermissions.includes(p))
+    ) {
+      return next(
+        new AppError("You do not have the required permission", 403)
+      );
+    }
+
+    // ✅ Authorized
+    next();
+  };
+};
 }
 
 export default new AuthMiddleware();

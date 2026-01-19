@@ -2,7 +2,8 @@
 import express from "express";
 import userService from "../../user-service/user.service.js";
 import { v4 as uuidv4 } from "uuid";
-
+import crypto from "crypto";
+import AppError from "../../utils/appError.js";
 export const userRouter = express.Router();
 
 // POST /create - Create a new user
@@ -59,9 +60,6 @@ userRouter.delete("/delete/:userId", async (req, res) => {
     res.status(500).json({ message: "Error queuing deletion" });
   }
 });
-
-import crypto from "crypto";
-import AppError from "../../utils/appError.js";
 
 userRouter.get("/:id", async (req, res) => {
   try {

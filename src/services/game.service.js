@@ -127,13 +127,10 @@ class GameService {
     try {
       const offset = (page - 1) * limit;
 
-      const whereCondition =
-        role === "admin"
-          ? { deletedAt: null }
-          : { deletedAt: null, isActive: true };
+
 
       const { rows, count } = await Games.findAndCountAll({
-        where: whereCondition,
+        where:{deletedAt:null},
         limit,
         offset,
         order: [["createdAt", "DESC"]],

@@ -10,20 +10,28 @@ const userRoutes = express.Router();
 userRoutes.get(
   "/all",
   authMiddleware.authenticate,
-  authMiddleware.authenticate,
-  authMiddleware.isAdmin,
+    authMiddleware.authorize({
+    roles: ["super_admin" , "admin"],
+    permissions: ["manage_users"],
+  }),
   userController.getAllUsers,
 );
 userRoutes.patch(
   "/update/:id",
   authMiddleware.authenticate,
-  authMiddleware.isAdmin,
+    authMiddleware.authorize({
+    roles: ["super_admin" , "admin"],
+    permissions: ["manage_users"],
+  }),
   userController.updateUser,
 );
 userRoutes.patch(
   "/toggle/:id",
   authMiddleware.authenticate,
-  authMiddleware.isAdmin,
+    authMiddleware.authorize({
+    roles: ["super_admin" , "admin"],
+    permissions: ["manage_users"],
+  }),
   userController.toggleActive,
 );
 userRoutes.post(
@@ -39,11 +47,7 @@ userRoutes.patch(
   userController.updateUser,
 );
 
-userRoutes.get(
-"/:id",
-authMiddleware.authenticate,
-userController.getUserById,
-);
+userRoutes.get("/:id", authMiddleware.authenticate, userController.getUserById);
 // userRoutes.delete("delete/:id" , authMiddleware.authenticate,authMiddleware.isAdmin, userController.deleteUser);
 // userRoutes.patch("toggle/:id" , authMiddleware.authenticate,authMiddleware.isAdmin, userController.toggleActive);
 //use update
