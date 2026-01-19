@@ -7,8 +7,8 @@ import {
 class AuthController {
   async register(req, res, next) {
     try {
-      const { name, email, password, role } = req.body;
-      const result = await authService.register(name, email, password, role);
+      const { name, email, password } = req.body;
+      const result = await authService.register(name, email, password,);
 
       setAccessTokenCookie(res, result.accessToken);
       setRefreshTokenCookie(res, result.refreshToken);
@@ -42,6 +42,7 @@ class AuthController {
         },
       });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

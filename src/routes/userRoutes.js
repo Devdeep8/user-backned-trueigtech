@@ -36,14 +36,12 @@ userRoutes.post(
 userRoutes.patch(
   "/:id",
   authMiddleware.authenticate,
-  authMiddleware.isAdmin,
   userController.updateUser,
 );
 
 userRoutes.get(
 "/:id",
 authMiddleware.authenticate,
-authMiddleware.isAdmin,
 userController.getUserById,
 );
 // userRoutes.delete("delete/:id" , authMiddleware.authenticate,authMiddleware.isAdmin, userController.deleteUser);

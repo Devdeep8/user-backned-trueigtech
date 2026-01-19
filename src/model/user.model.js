@@ -36,14 +36,22 @@ export const User = sequelize.define(
       type: DataTypes.DATE, // Track expiry
       allowNull: true,
     },
-   deletedAt: {
-    type: DataTypes.DATE,
-    allowNull: true,
-   },
-   isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-   }
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    roleId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "roles",
+        key: "id",
+      },
+    },
   },
   {
     timestamps: true,
@@ -51,5 +59,5 @@ export const User = sequelize.define(
     updatedAt: "updated_at",
     tableName: "users",
     paranoid: true,
-  }
+  },
 );

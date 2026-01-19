@@ -124,7 +124,6 @@ class GameService {
     }
   }
   async showAllGames({ role, page, limit }) {
-    console.log(role);
     try {
       const offset = (page - 1) * limit;
 

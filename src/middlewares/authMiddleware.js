@@ -1,7 +1,7 @@
 // middlewares/authMiddleware.js
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
-import { User } from "../model/user.model.js";
+import userRepository from "../dbOperation/user.repository.js";
 
 class AuthMiddleware {
   async authenticate(req, res, next) {
@@ -16,7 +16,7 @@ class AuthMiddleware {
       const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
       // INSTANT CHECK: Validate against DB
-      const user = await User.findByPk(decoded.userId);
+      const user = await userRepository.getUserByIdentifier({id : decoded.userId})
 
       if (!user) {
         throw new AppError("User no longer exists", 401);
@@ -27,7 +27,7 @@ class AuthMiddleware {
       }
 
       // Optional: Check if role changed
-      if (user.role !== decoded.role) {
+      if (user.userRole.name !== decoded.role) {
         // Role changed, force refresh to get new token
         throw new AppError("Role changed, please login again", 401);
       }
@@ -35,7 +35,7 @@ class AuthMiddleware {
       // Attach user to request
       req.user = {
         userId: user.id,
-        role: user.role,
+        role: user.userRole.name,
         email: user.email,
       };
 
