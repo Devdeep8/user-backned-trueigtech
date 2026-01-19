@@ -1,6 +1,7 @@
 // middlewares/authMiddleware.js
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
+
 import userRepository from "../dbOperation/user.repository.js";
 
 class AuthMiddleware {

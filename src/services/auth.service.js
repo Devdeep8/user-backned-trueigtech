@@ -197,11 +197,7 @@ class AuthService {
   }
 
   async me(userId) {
-    const user = await User.findByPk(userId, {
-      attributes: {
-        exclude: ["password", "refreshToken", "refreshTokenExpiresAt"],
-      },
-    });
+    const user = await userRepository.getUserByIdentifier({id : userId});
     if (!user) {
       throw new AppError("User not found", 404);
     }

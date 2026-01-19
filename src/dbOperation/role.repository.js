@@ -25,9 +25,6 @@ class RoleRepository {
         return await this.Role.update(data,{where:{id}})
     }
     
-    async deleteRole(id){
-        return await this.Role.destroy({where:{id}})
-    }
 
 }
 
