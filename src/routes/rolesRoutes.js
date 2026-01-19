@@ -15,7 +15,8 @@ roleRoutes.patch("/update/:id" , authMiddleware.authenticate , authMiddleware.au
     roles: ["super_admin" , "admin"],
     permissions: ["manage_roles"],
 }), roleController.updateRole)
-
-
+roleRoutes.get("/with-permissions", authMiddleware.authenticate, roleController.roleWithPermissions);
+roleRoutes.post("/:roleId/permissions", authMiddleware.authenticate, roleController.createRolePermission)
+roleRoutes.delete("/:roleId/permissions/:permissionId", authMiddleware.authenticate, roleController.deleteRolePermission)
 
 export default roleRoutes;

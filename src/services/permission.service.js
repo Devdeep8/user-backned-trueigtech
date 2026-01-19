@@ -1,9 +1,12 @@
 import AppError from "../utils/appError.js";
-
+import PermissionRepository from "../dbOperation/permission.repository.js";
 class PermissionService {
     async getAllPermissions() {
-        
-        return await PermissionRepository.getAllPermissions();
+        try {
+            return await PermissionRepository.getAllPermissions();
+        } catch (error) {
+            throw error;
+        }
     }
     async getPermissionById(id) {
         if (!id) {

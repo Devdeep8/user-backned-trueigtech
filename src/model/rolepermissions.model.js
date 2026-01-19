@@ -1,25 +1,26 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 
-export const RolePermission = sequelize.define("RolePermission", {
-  roleId: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
+export const RolePermission = sequelize.define(
+  "RolePermission",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    roleId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    permissionId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
   },
-  permissionId: {
-    type: DataTypes.UUID,
-    unique: true,
-  },
-  createdAt: {
-    allowNull: false,
-    type: DataTypes.DATE
-  },
-  updatedAt: {
-    allowNull: false,
-    type: DataTypes.DATE
+  {
+    tableName: "RolePermissions", // MUST MATCH
+    timestamps: true,
   }
-}, {
-  tableName: "rolepermissions",
-});
+);
 

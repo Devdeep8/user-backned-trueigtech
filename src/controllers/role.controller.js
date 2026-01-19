@@ -46,6 +46,55 @@ class RoleController {
         }
     }
 
+    async roleWithPermissions(req,res,next){
+        try {
+            const rolesWithPermissions = await roleService.roleWithPermissions();
+            return res.status(200).json({
+                success: true,
+                message: "Roles with permissions retrieved successfully",
+                data: {
+                    rolesWithPermissions,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async createRolePermission(req,res,next){
+        const {roleId} = req.params;
+        const {permissionId} = req.body;
+        try {
+            const rolePermission = await roleService.createRolePermission(roleId,permissionId);
+            return res.status(201).json({
+                success: true,
+                message: "Role permission created successfully",
+                data: {
+                    rolePermission,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteRolePermission(req,res,next){
+        const { roleId , permissionId} = req.params;
+        try {
+            const rolePermission = await roleService.deleteRolePermission(roleId , permissionId);
+            return res.status(200).json({
+                success: true,
+                message: "Role permission deleted successfully",
+                data: {
+                    rolePermission,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
     
 
 }
