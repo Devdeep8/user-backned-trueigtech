@@ -8,6 +8,9 @@ import { userRouter } from "./routes/user.routes/route.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import errorHandler from "./middlewares/errormiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
+import roleRoutes from "./routes/rolesRoutes.js";
+import permissionRoutes from "./routes/permissionroute.js";
+
 const app = express();
 const PORT = process.env.PORT || 6001;
 
@@ -27,7 +30,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/game", gameRoutes);
 app.use("/api/user", userRouter);
 app.use("/api/users", userRoutes);
-
+app.use("/api/roles", roleRoutes);
+app.use("/api/permissions", permissionRoutes);
 app.use(errorHandler);
 
 app.get("/health", async (req, res) => {

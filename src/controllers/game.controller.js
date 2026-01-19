@@ -78,7 +78,6 @@ class GameController {
       const limit = Number(req.query.limit) || 10;
 
       const result = await gameService.showAllGames({
-        role: req.user.role,
         page,
         limit,
       });

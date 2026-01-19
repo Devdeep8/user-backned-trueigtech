@@ -6,26 +6,31 @@ import upload from "../middlewares/uploadConfig.js";
 const gameRoutes = express.Router();
 
 // Public routes
-gameRoutes.post("/create", gameController.createGame);
-gameRoutes.delete("/delete", authMiddleware.authenticate, authMiddleware.isAdmin,gameController.deleteGame);
-gameRoutes.put("/update/:id", authMiddleware.authenticate, authMiddleware.isAdmin,gameController.updateGame);
-gameRoutes.post(
-  "/bulkupload",
-  authMiddleware.authenticate,
-  authMiddleware.isAdmin,
+gameRoutes.post("/create", authMiddleware.authenticate,
+    authMiddleware.authorize({
+    roles: ["super_admin" ],
+    permissions: ["manage_games"],
+  }),
   upload.single("file"),
   gameController.bulkUpload
 );
 gameRoutes.get(
   "/showallgames",
   authMiddleware.authenticate,
+  authMiddleware.authorize({
+    roles: ["super_admin" ],
+    permissions: ["manage_games"],
+  }),
   gameController.showAllGames
 );
 
 gameRoutes.patch(
   "/toggleactive",
   authMiddleware.authenticate,
-  authMiddleware.isAdmin,
+    authMiddleware.authorize({
+    roles: ["super_admin" ],
+    permissions: ["manage_games"],
+  }),
   gameController.toggleActive
 );
 

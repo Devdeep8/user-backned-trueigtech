@@ -1,81 +1,82 @@
-import { User } from "../model/user.model.js";
+import { User, Role } from "../model/index.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import AppError from "../utils/appError.js";
 import dotenv from "dotenv";
+import userRepository from "../dbOperation/user.repository.js";
+import roleRepository from "../dbOperation/role.repository.js";
 dotenv.config();
 class AuthService {
-  async register(name, email, password, role = "user") {
+  async register(name, email, password) {
     if (!name || !email || !password) {
       throw new AppError("Name, email and password are required", 400);
     }
+
     if (password.length < 6) {
       throw new AppError("Password must be at least 6 characters", 400);
     }
-    const existingUser = await User.findOne({ where: { email } });
+
+    const existingUser = await userRepository.getUserByIdentifier({email});
     if (existingUser) {
       throw new AppError("Email already registered", 409);
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Generate Refresh Token early to save with user creation
-    // Note: We need a temporary ID context or we generate it afterwards.
-    // Since generateRefreshToken needs userId, we actually have to create user first OR use UUIDs.
-    // Assuming auto-increment or DB generated IDs, we stick to create-first but we can optimize the error handling.
-    // However, if we want to be "fully correct" as requested, we should wrap this in a transaction if possible,
-    // but without seeing the DB config, I will optimize the flow to be cleaner.
+    // ✅ STEP 1: Check total users
+    const userCount = await User.count();
 
-    // Actually, looking at the code, it uses `user.id` for token generation.
-    // So we MUST create the user first to get the ID (unless we pre-generate UUID).
-    // The current flow works but let's make it cleaner and ensuring we don't leave a user without a token if update fails.
+    // ✅ STEP 2: Decide role name
+    const roleName = userCount === 0 ? "admin" : "user";
 
-    const user = await User.create({
+    // ✅ STEP 3: Fetch role from DB
+  const roleRecord = await roleRepository.getRoleByIdentifier({name : roleName})
+
+    if (!roleRecord) {
+      throw new AppError(`Role '${roleName}' not found`, 500);
+    }
+
+    // ✅ STEP 4: Create user
+    const user = await userRepository.createUser({
       name,
       email,
       password: hashedPassword,
-      role,
-    });
 
-    if (!user) {
-      throw new AppError("Failed to create user", 500);
-    }
+      // legacy enum (keep for now)
+      role: roleName,
+
+      // RBAC system
+      roleId: roleRecord.id,
+    });
 
     const accessToken = this.generateAccessToken(user.id, user.role);
     const refreshToken = this.generateRefreshToken(user.id);
+
     const refreshTokenExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
     );
 
-    // Update with tokens
-    try {
-      await user.update({
-        refreshToken,
-        refreshTokenExpiresAt,
-      });
-    } catch (err) {
-      // If updating token fails, we should probably delete the user to avoid "half-created" state
-      // or just throw error (user can try login to trigger new token generation if login has that logic,
-      // but login usually just checks password).
-      // Best approach for "fully correct": cleanup.
-      await user.destroy();
-      throw new AppError("Failed to generate initial tokens", 500);
-    }
+    await user.update({
+      refreshToken,
+      refreshTokenExpiresAt,
+    });
 
     return {
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.userRole.name,
       },
       accessToken,
       refreshToken,
     };
   }
 
-  async login (email , password){
-    console.log(email , password)
-    const user = await User.findOne({ where: { email } });
+  async login(email, password) {
+
+    const user = await userRepository.getUserByIdentifier({email})
+    
     if (!user) {
       throw new AppError("User not found", 404);
     }
@@ -83,10 +84,10 @@ class AuthService {
     if (!isPasswordValid) {
       throw new AppError("Invalid password", 401);
     }
-    const accessToken = this.generateAccessToken(user.id, user.role);
+    const accessToken = this.generateAccessToken(user.id, user.userRole.name);
     const refreshToken = this.generateRefreshToken(user.id);
     const refreshTokenExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
     );
     try {
       await user.update({
@@ -103,7 +104,7 @@ class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.userRole.name,
       },
       accessToken,
       refreshToken,
@@ -124,7 +125,7 @@ class AuthService {
     }
 
     // Find user
-    const user = await User.findByPk(decoded.userId);
+    const user = await userRepository.getUserByIdentifier({id : decoded.userId})
     if (!user) {
       throw new AppError("User not found", 404);
     }
@@ -140,7 +141,7 @@ class AuthService {
     }
 
     // Generate new tokens
-    const accessToken = this.generateAccessToken(user.id, user.role);
+    const accessToken = this.generateAccessToken(user.id, user.userRole.name);
     const refreshToken = this.generateRefreshToken(user.id);
 
     // Update refresh token
@@ -167,7 +168,7 @@ class AuthService {
       throw new AppError("User ID is required", 400);
     }
 
-    const user = await User.findByPk(userId);
+    const user = await userRepository.getUserByIdentifier({id : userId});
     if (!user) {
       throw new AppError("User not found", 404);
     }
@@ -196,11 +197,7 @@ class AuthService {
   }
 
   async me(userId) {
-    const user = await User.findByPk(userId, {
-      attributes: {
-        exclude: ["password", "refreshToken", "refreshTokenExpiresAt"],
-      },
-    });
+    const user = await userRepository.getUserByIdentifier({id : userId});
     if (!user) {
       throw new AppError("User not found", 404);
     }

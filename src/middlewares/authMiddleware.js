@@ -1,7 +1,8 @@
 // middlewares/authMiddleware.js
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
-import { User } from "../model/user.model.js";
+
+import userRepository from "../dbOperation/user.repository.js";
 
 class AuthMiddleware {
   async authenticate(req, res, next) {
@@ -16,7 +17,7 @@ class AuthMiddleware {
       const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
       // INSTANT CHECK: Validate against DB
-      const user = await User.findByPk(decoded.userId);
+      const user = await userRepository.getUserByIdentifier({id : decoded.userId})
 
       if (!user) {
         throw new AppError("User no longer exists", 401);
@@ -27,7 +28,7 @@ class AuthMiddleware {
       }
 
       // Optional: Check if role changed
-      if (user.role !== decoded.role) {
+      if (user.userRole.name !== decoded.role) {
         // Role changed, force refresh to get new token
         throw new AppError("Role changed, please login again", 401);
       }
@@ -35,8 +36,9 @@ class AuthMiddleware {
       // Attach user to request
       req.user = {
         userId: user.id,
-        role: user.role,
+        role: user.userRole.name,
         email: user.email,
+        permissions: user.userRole.permissions.map((p) => p.key),
       };
 
       next();
@@ -50,7 +52,7 @@ class AuthMiddleware {
   }
 
   isAdmin(req, res, next) {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "super_admin") {
       return next(new AppError("Admin access required", 403));
     }
     next();
@@ -62,6 +64,40 @@ class AuthMiddleware {
     }
     next();
   }
+
+  authorize ({ roles = [], permissions = [] }) {
+  return (req, res, next) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new AppError("Unauthorized", 401));
+    }
+
+    const userRole = user.role;
+    const userPermissions = user?.permissions || [];
+
+    console.log(userRole, userPermissions);
+    // 1️⃣ Role check
+    if (roles.length && !roles.includes(userRole)) {
+      return next(
+        new AppError("You do not have the required role", 403)
+      );
+    }
+
+    // 2️⃣ Permission check
+    if (
+      permissions.length &&
+      !permissions.every((p) => userPermissions.includes(p))
+    ) {
+      return next(
+        new AppError("You do not have the required permission", 403)
+      );
+    }
+
+    // ✅ Authorized
+    next();
+  };
+};
 }
 
 export default new AuthMiddleware();
