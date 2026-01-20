@@ -10,34 +10,30 @@ const userRoutes = express.Router();
 userRoutes.get(
   "/all",
   authMiddleware.authenticate,
-    authMiddleware.authorize({
-    roles: ["super_admin" , "admin"],
-    permissions: ["manage_users"],
+  authMiddleware.authorize({
+    permissions: ["user.read"],
   }),
   userController.getAllUsers,
 );
 userRoutes.patch(
   "/update/:id",
   authMiddleware.authenticate,
-    authMiddleware.authorize({
-    roles: ["super_admin" , "admin"],
-    permissions: ["manage_users"],
+  authMiddleware.authorize({
+    permissions: ["user.update"],
   }),
   userController.updateUser,
 );
 userRoutes.patch(
   "/toggle/:id",
   authMiddleware.authenticate,
-    authMiddleware.authorize({
-    roles: ["super_admin" , "admin"],
-    permissions: ["manage_users"],
+  authMiddleware.authorize({
+    permissions: ["user.update"], // or user.delete if logically soft delete
   }),
   userController.toggleActive,
 );
 userRoutes.post(
   "/logout/:id",
   authMiddleware.authenticate,
-  authMiddleware.isAdmin,
   userController.forceLogout,
 );
 

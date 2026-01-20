@@ -76,7 +76,6 @@ class AuthMiddleware {
     const userRole = user.role;
     const userPermissions = user?.permissions || [];
 
-    console.log(userRole, userPermissions);
     // 1️⃣ Role check
     if (roles.length && !roles.includes(userRole)) {
       return next(
