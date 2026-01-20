@@ -59,7 +59,7 @@ class GameController {
   async bulkUpload(req, res, next) {
     try {
       const file = req.file;
-      const {successful , failed} = await gameService.bulkUpload(file);
+      const { successful, failed } = await gameService.bulkUpload(file);
       return res.status(200).json({
         success: true,
         message: "Games uploaded successfully",
@@ -80,6 +80,7 @@ class GameController {
       const result = await gameService.showAllGames({
         page,
         limit,
+        user: req.user, // Pass full user context (roles & permissions)
       });
       return res.status(200).json({
         success: true,

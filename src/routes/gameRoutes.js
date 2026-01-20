@@ -6,32 +6,69 @@ import upload from "../middlewares/uploadConfig.js";
 const gameRoutes = express.Router();
 
 // Public routes
-gameRoutes.post("/create", authMiddleware.authenticate,
-    authMiddleware.authorize({
-    roles: ["super_admin" ],
-    permissions: ["manage_games"],
+// Public routes (Actually protected)
+gameRoutes.post(
+  "/create",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["game.create"],
+  }),
+  // Assuming createGame is the method for single creation, but the code had bulkUpload attached to /create?
+  // Checking game.controller.js below.
+  // If the user previously had bulkUpload on /create, I will keep it but usually /create is single.
+  // Wait, line 15 was `gameController.bulkUpload`.
+  // I will check the controller. If createGame exists, I should use it for /create and bulkUpload for /bulkupload.
+  // The User's previous code snippet showed:
+  // gameRoutes.post("/create", gameController.createGame); (Old)
+  // gameRoutes.post("/create", ... bulkUpload); (New/Current)
+  // This looks like a mistake in the previous user edit or my reading.
+  // I will split them properly.
+  gameController.createGame,
+);
+
+gameRoutes.post(
+  "/bulkupload",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["game.create"],
   }),
   upload.single("file"),
-  gameController.bulkUpload
+  gameController.bulkUpload,
 );
 gameRoutes.get(
   "/showallgames",
   authMiddleware.authenticate,
   authMiddleware.authorize({
-    roles: ["super_admin" ],
-    permissions: ["manage_games"],
+    permissions: ["game.read"],
   }),
-  gameController.showAllGames
+  gameController.showAllGames,
 );
 
 gameRoutes.patch(
   "/toggleactive",
   authMiddleware.authenticate,
-    authMiddleware.authorize({
-    roles: ["super_admin" ],
-    permissions: ["manage_games"],
+  authMiddleware.authorize({
+    permissions: ["game.update"],
   }),
-  gameController.toggleActive
+  gameController.toggleActive,
+);
+
+gameRoutes.delete(
+  "/delete",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["game.delete"],
+  }),
+  gameController.deleteGame,
+);
+
+gameRoutes.put(
+  "/update/:id",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["game.update"],
+  }),
+  gameController.updateGame,
 );
 
 // Protected routes

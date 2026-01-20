@@ -86,7 +86,7 @@ class GameService {
         } catch (bulkErr) {
           // If bulkCreate fails, all rows fail, log error
           games.forEach((g, idx) =>
-            failed.push({ row: idx + 1, data: g, error: bulkErr.message })
+            failed.push({ row: idx + 1, data: g, error: bulkErr.message }),
           );
         }
       } else {
@@ -96,7 +96,7 @@ class GameService {
           const batch = games.slice(i, i + batchSize);
 
           const results = await Promise.allSettled(
-            batch.map((game) => this.createGame(game))
+            batch.map((game) => this.createGame(game)),
           );
 
           results.forEach((res, index) => {
@@ -123,14 +123,28 @@ class GameService {
       }
     }
   }
-  async showAllGames({ role, page, limit }) {
+  async showAllGames({ page, limit, user }) {
     try {
       const offset = (page - 1) * limit;
 
+      const whereCondition = { deletedAt: null };
 
+      // Visibility Logic:
+      // If user does NOT have 'game.update' permission (or is not admin/manager/super_admin),
+      // they can only see active games.
+      // We can check permissions strictly.
+      const hasPrivilege =
+        user?.permissions?.includes("game.update") ||
+        user?.role === "admin" ||
+        user?.role === "super_admin" ||
+        user?.role === "manager"; // Redundant if manager has game.update, but safe.
+
+      if (!hasPrivilege) {
+        whereCondition.isActive = true;
+      }
 
       const { rows, count } = await Games.findAndCountAll({
-        where:{deletedAt:null},
+        where: whereCondition,
         limit,
         offset,
         order: [["createdAt", "DESC"]],
