@@ -68,7 +68,13 @@ class UserRepository {
   }
 
   async updateUser(id, data) {
-    return await this.User.update(data, { where: { id } });
+    const user = await this.User.update(data, { where: { id } });
+    return user;
+  }
+
+
+  async softDeleteUser(id) {
+    return await this.User.update({ deletedAt: new Date() }, { where: { id } });
   }
 }
 export default new UserRepository();

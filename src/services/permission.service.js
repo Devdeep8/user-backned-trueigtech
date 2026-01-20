@@ -40,6 +40,14 @@ class PermissionService {
         }
         return await PermissionRepository.deletePermission(id);
     }
+
+    async groupPermission() {
+        const allGroupedPermission = await PermissionRepository.getGroupedPermissions();
+        if (!allGroupedPermission) {
+            throw new AppError("No permission found");
+        }
+        return allGroupedPermission;
+    }
 }
 
 export default new PermissionService();

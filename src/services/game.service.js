@@ -1,14 +1,18 @@
 import AppError from "../utils/appError.js";
 import { Games } from "../model/game.model.js";
-import * as gameDbops from "../dbOperation/game.repository.js";
+import gameDbops from "../dbOperation/game.repository.js";
 import csvParser from "csv-parser";
 import fs from "fs";
+import { buildResourceFilter } from "../utils/where-clause-builder.js";
 
 class GameService {
+  constructor() {
+    this.gameDbops = gameDbops;
+  }
   async createGame(data) {
     if (!data.name) throw new AppError("Game name is required", 400);
     try {
-      return await gameDbops.createGameRecord(data);
+      return await this.gameDbops.createGameRecord(data);
     } catch (err) {
       throw new AppError(err.message || "Failed to create game", 500);
     }
@@ -16,14 +20,14 @@ class GameService {
 
   async deleteGame(gameId) {
     if (!gameId) throw new AppError("Game ID is required", 400);
-    return await gameDbops.softDeleteGame(gameId);
+    return await this.gameDbops.softDeleteGame(gameId);
   }
   async updateGame({ data, id }) {
     if (!id || !data) {
       throw new AppError("gameId required and data also", 400);
     }
 
-    const result = await gameDbops.updateGameById(id, data);
+    const result = await this.gameDbops.updateGameById(id, data);
 
     console.log(result);
     if (!affected) throw new AppError("Game not found", 404);
@@ -35,7 +39,7 @@ class GameService {
       throw new AppError("Game ID is required", 400);
     }
     try {
-      const game = await gameDbops.toggleActive(gameId);
+      const game = await this.gameDbops.toggleActive(gameId);
       if (!game) {
         throw new AppError("Game not found", 404);
       }
@@ -79,7 +83,7 @@ class GameService {
       if (games.length > 600) {
         // 🔹 Large file → bulkCreate for speed
         try {
-          const uploadedGames = await Games.bulkCreate(games, {
+          const uploadedGames = await this.gameDbops.bulkCreateGames(games, {
             validate: true,
           });
           successful.push(...uploadedGames);
@@ -127,23 +131,11 @@ class GameService {
     try {
       const offset = (page - 1) * limit;
 
-      const whereCondition = { deletedAt: null };
+      const whereCondition = buildResourceFilter(user , "game")
 
-      // Visibility Logic:
-      // If user does NOT have 'game.update' permission (or is not admin/manager/super_admin),
-      // they can only see active games.
-      // We can check permissions strictly.
-      const hasPrivilege =
-        user?.permissions?.includes("game.update") ||
-        user?.role === "admin" ||
-        user?.role === "super_admin" ||
-        user?.role === "manager"; // Redundant if manager has game.update, but safe.
 
-      if (!hasPrivilege) {
-        whereCondition.isActive = true;
-      }
 
-      const { rows, count } = await Games.findAndCountAll({
+      const { rows, count } = await this.gameDbops.findAllGames({
         where: whereCondition,
         limit,
         offset,
@@ -160,7 +152,7 @@ class GameService {
         },
       };
     } catch (error) {
-      throw new AppError("Failed to fetch games", 500);
+      throw new AppError(error.message || "Failed to fetch games", 500);
     }
   }
 }

@@ -117,6 +117,22 @@ class UserController {
       next(error);
     }
   }
+
+  async userSoftDelete(req , res , next){
+    try{
+    const {id} = req.params;
+
+    const user = await userService.deleteUser(id);
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+    }
+    catch(error){
+      next(error);
+    }
+  }
 }
 
 export default new UserController();

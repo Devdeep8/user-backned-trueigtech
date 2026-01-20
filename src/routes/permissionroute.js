@@ -29,5 +29,13 @@ permissionRoutes.patch(
   }),
   permissionController.updatePermission,
 );
+permissionRoutes.get(
+    "/group",
+    authMiddleware.authenticate,
+    authMiddleware.authorize({
+      permissions: ["permission.read"],
+    }),
+    permissionController.groupPermission,
+  );
 
 export default permissionRoutes;
