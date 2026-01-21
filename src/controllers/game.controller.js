@@ -1,9 +1,12 @@
 import db from "../model/db.js";
 import gameService from "../services/game.service.js";
+import BulkCreateGameService from "../services/game.services/bulkCreate.game.service.js";
 import BulkUpdateGamesService from "../services/game.services/bulkupate.game.service.js";
 import GetAllGamesService from "../services/game.services/get.game.service.js";
 import UpdateGameService from "../services/game.services/update.game.service.js";
 import AppError from "../utils/appError.js";
+import fs from "fs";
+import csvParser from "csv-parser";
 
 class GameController {
   async createGame(req, res, next) {
@@ -66,7 +69,7 @@ class GameController {
   async bulkUpdate(req, res, next) {
     try {
       const { gameIds, isActive } = req.body;
-      console.log(gameIds , isActive , "date")
+      console.log(gameIds, isActive, "date");
 
       if (!gameIds) {
         throw new AppError("Games or isActive is missing", 400);
@@ -82,7 +85,7 @@ class GameController {
         db,
       );
       const result = await bulkUpdateGamesService.run();
-      
+
       return res.status(200).json({
         success: true,
         message: "Games updated successfully",
@@ -112,9 +115,48 @@ class GameController {
     }
   }
   async bulkUpload(req, res, next) {
+    const file = req.file;
+
+    if (!file) return next(new AppError("No file uploaded", 400));
+
+    const games = [];
+
     try {
-      const file = req.file;
-      const { successful, failed } = await gameService.bulkUpload(file);
+      // 1️⃣ Read CSV into array
+      await new Promise((resolve, reject) => {
+        fs.createReadStream(file.path)
+          .pipe(csvParser())
+          .on("data", (row) => {
+            games.push({
+              id: row.id || undefined, // if provided
+              name: row.name || null,
+              description: row.description || null,
+              genre: row.genre || null,
+              imageUrl: row.imageUrl || null,
+              gameUrl: row.gameUrl || null,
+              isActive: row.isActive === "true" || row.isActive === true,
+            });
+          })
+          .on("end", resolve)
+          .on("error", (err) =>
+            reject(new AppError("Failed to parse CSV", 500)),
+          );
+      });
+
+      if (!games.length) throw new AppError("CSV file is empty", 400);
+
+      // 2️⃣ Call BulkCreateGameService
+      console.log(games, "debug");
+
+      const service = new BulkCreateGameService(
+        AppError,
+        { games },
+        { user: req.user },
+        db,
+      );
+      const { successful, failed } = await service.run();
+      console.log(successful, failed, "debug");
+
       return res.status(200).json({
         success: true,
         message: "Games uploaded successfully",
@@ -123,8 +165,15 @@ class GameController {
           failed,
         },
       });
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
+    } finally {
+      // ✅ Delete CSV file safely
+      try {
+        if (file?.path) await fs.promises.unlink(file.path);
+      } catch (unlinkErr) {
+        console.error("Failed to delete CSV file:", unlinkErr);
+      }
     }
   }
   async showAllGames(req, res, next) {
@@ -139,7 +188,7 @@ class GameController {
 
       const pagination = { page, limit };
       const dateRange = req.query.dateRange || "";
-      console.log(search , "api call in search")
+      console.log(search, "api call in search");
       const filter = {};
       if (status) filter.isActive = status === "active" ? true : false;
       if (genre) filter.genre = genre;
@@ -148,7 +197,6 @@ class GameController {
         user: req.user, // from auth middleware
       };
 
-      console.log(sortBy, genre, pagination, dateRange, "debug");
 
       const getAllGamesService = new GetAllGamesService(
         AppError,

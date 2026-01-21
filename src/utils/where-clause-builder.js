@@ -11,7 +11,6 @@ export const buildResourceFilter = (user, resource) => {
 //   console.log(user);
   if (!user || !user.permissions) {
     // No user or no permissions → show only active, non-deleted items
-    console.log(user.permissions , "debug");
     whereCondition.isActive = true;
     return whereCondition;
   }

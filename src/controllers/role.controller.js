@@ -104,7 +104,6 @@ class RoleController {
 
   async createRoleWithPermsisson(req, res, next) {
     const { data, permissions } = req.body;
-    console.log(data, permissions, req.body, "debug");
     try {
       const role = await roleService.createRole(data, req.user?.role);
       await Promise.all(

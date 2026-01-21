@@ -12,7 +12,6 @@ class GetAllGamesService extends GenericGetService {
     );
 
 
-    console.log(where, "debug");
 
     // Query database
     const { rows: games, count: total } = await this.db.game.findAndCountAll({
