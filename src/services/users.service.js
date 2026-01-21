@@ -1,9 +1,20 @@
 import userRepository from "../dbOperation/user.repository.js";
 import AppError from "../utils/appError.js";
+import bcrypt from "bcryptjs";
 
 class UserService {
   constructor() {
     this.userRepository = userRepository;
+  }
+
+  async createUser(data) {
+    const {password , ...rest} = data;
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user  = await this.userRepository.createUser({...rest , password : hashedPassword});
+    if (!user) {
+      throw new AppError("User not created", 400);
+    }
+    return user;
   }
   async getAllUsers() {
     return await this.userRepository.getAllUsers();

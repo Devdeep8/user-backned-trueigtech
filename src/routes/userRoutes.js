@@ -7,6 +7,16 @@ import userController from "../controllers/user.controller.js";
 const userRoutes = express.Router();
 
 // protected routes
+
+userRoutes.post(
+  "/create",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["user.create"],
+  }),
+  userController.createUser,
+);
+
 userRoutes.get(
   "/all",
   authMiddleware.authenticate,

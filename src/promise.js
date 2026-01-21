@@ -1,57 +1,91 @@
-class User {
-  constructor(name, email, role) {
-    this.name = name;
-    this.email = email;
-    this.role = role;
+// class User {
+//   constructor(name, email, role) {
+//     this.name = name;
+//     this.email = email;
+//     this.role = role;
+//   }
+
+//   greetUserAccodingToRole(role) {
+//     if (role === "admin") {
+//       return `hello ${this.name}`;
+//     }
+//     else {
+//         return `hello ${this.role}`
+//     }
+//   }
+
+//   can(action) {
+//     return false; // default user has no permissions
+//   }
+
+//   getInfo() {
+//     return { name: this.name, email: this.email, role: this.role };
+//   }
+// }
+
+// class SuperAdmin extends User {
+//     constructor(name , email){
+//         super(name , email )
+//         this.role = "superadmin"
+//     }
+
+//     can(action) {
+//         return true;
+//     }
+// }
+
+// class StaffMember extends User {
+//   constructor(name, email, permissions = []) {
+//     super(name, email);
+//     this.role = "staff";
+//     this.permissions = permissions; // e.g., ['updateUser', 'updateGame', 'readUser']
+//   }
+
+//   can(action) {
+//     // Check if action is in allowed permissions
+//     return this.permissions.includes(action);
+//   }
+// }
+
+
+// const user = new User("Devdeep" , "patidardevdeep8@gmail.com" , "admin")
+// const ansh = new User("Ansh" , "ansh@gmail.com" , "staff")
+// const superAdmin = new SuperAdmin("Alice", "alice@company.com");
+// const staff = new StaffMember("Bob", "bob@company.com", ["updateUser", "readUser"]);
+// console.log(superAdmin.can("deleteGame")); // true
+
+// console.log(staff.can("deleteGame"));      // false
+export class BaseService {
+  constructor(error, args, context, db) {
+    this.error = error;
+    this.args = args;
+    this.context = context;
+    this.db = db;
   }
 
-  greetUserAccodingToRole(role) {
-    if (role === "admin") {
-      return `hello ${this.name}`;
-    }
-    else {
-        return `hello ${this.role}`
-    }
-  }
-
-  can(action) {
-    return false; // default user has no permissions
-  }
-
-  getInfo() {
-    return { name: this.name, email: this.email, role: this.role };
+  async run() {
+    throw new Error("run() must be implemented by child service");
   }
 }
 
-class SuperAdmin extends User {
-    constructor(name , email){
-        super(name , email )
-        this.role = "superadmin"
+class login extends BaseService {
+    constructor(error , argument , context , db){
+        super(error , argument , context , db)
     }
 
-    can(action) {
-        return true;
+
+    async run() {
+      const {email , password}  = this.args
+      const user = await this.db.user.findUnique({where : {email}})
+      if(!user){
+        throw new Error("User not found")
+      }
+      const isPasswordValid = await bcrypt.compare(password , user.password)
+      if(!isPasswordValid){
+        throw new Error("Invalid password")
+      }
+      return user
     }
+
+
 }
-
-class StaffMember extends User {
-  constructor(name, email, permissions = []) {
-    super(name, email);
-    this.role = "staff";
-    this.permissions = permissions; // e.g., ['updateUser', 'updateGame', 'readUser']
-  }
-
-  can(action) {
-    // Check if action is in allowed permissions
-    return this.permissions.includes(action);
-  }
-}
-
-
-const user = new User("Devdeep" , "patidardevdeep8@gmail.com" , "admin")
-const ansh = new User("Ansh" , "ansh@gmail.com" , "staff")
-const superAdmin = new SuperAdmin("Alice", "alice@company.com");
-const staff = new StaffMember("Bob", "bob@company.com", ["updateUser", "readUser"]);
-console.log(superAdmin.can("deleteGame")); // true
-
-console.log(staff.can("deleteGame"));      // false

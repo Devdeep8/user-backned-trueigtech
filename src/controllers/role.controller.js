@@ -101,5 +101,27 @@ class RoleController {
       next(error);
     }
   }
+
+  async createRoleWithPermsisson(req, res, next) {
+    const { data, permissions } = req.body;
+    console.log(data, permissions, req.body, "debug");
+    try {
+      const role = await roleService.createRole(data, req.user?.role);
+      await Promise.all(
+        permissions.map((item) =>
+          roleService.createRolePermission(role.id, item),
+        ),
+      );
+      return res.status(201).json({
+        success: true,
+        message: "Role created successfully",
+        data: {
+          role,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 export default new RoleController();

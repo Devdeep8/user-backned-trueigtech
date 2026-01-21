@@ -54,5 +54,8 @@ roleRoutes.delete(
   }),
   roleController.deleteRolePermission,
 );
+roleRoutes.post("/create-with-permissions", authMiddleware.authenticate, authMiddleware.authorize({
+  permissions: ["role.create"],
+}), roleController.createRoleWithPermsisson)
 
 export default roleRoutes;

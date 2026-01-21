@@ -1,4 +1,4 @@
-import { User, Role } from "../model/index.js";
+import { User } from "../model/index.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import AppError from "../utils/appError.js";

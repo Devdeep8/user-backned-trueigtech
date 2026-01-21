@@ -3,6 +3,23 @@ import authService from "../services/auth.service.js";
 import AppError from "../utils/appError.js";
 
 class UserController {
+  async createUser(req , res ,next) {
+    const {data} = req.body;
+    console.log("Debug data",data)
+    try {
+      const user = await userService.createUser(data);
+      if (!user){
+        throw new AppError("user not created" , 500)
+      }
+      res.status(201).json({
+        success: true,
+        message: "User created successfully",
+        data: { user },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   async getAllUsers(req, res, next) {
     try {
       const users = await userService.getAllUsers();

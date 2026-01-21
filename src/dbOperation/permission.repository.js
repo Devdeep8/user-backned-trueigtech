@@ -19,12 +19,9 @@ class PermissionRepository {
     return await this.Permission.destroy({ where: { id } });
   }
 
-  async getGroupedPermissions() {
+  async getGroupedPermissions(options) {
     // Get all permissions
-    const permissions = await this.Permission.findAll({
-      attributes: ["key", "description"],
-      order: [["key", "ASC"]],
-    });
+    const permissions = await this.Permission.findAll(options);
 
     // Group by resource (part before ":")
     const grouped = permissions.reduce((acc, perm) => {
@@ -35,6 +32,7 @@ class PermissionRepository {
       }
 
       acc[resource].push({
+        id: perm.id,
         key: perm.key,
         action: action,
         description: perm.description,

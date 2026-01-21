@@ -42,7 +42,10 @@ class PermissionService {
     }
 
     async groupPermission() {
-        const allGroupedPermission = await PermissionRepository.getGroupedPermissions();
+        const allGroupedPermission = await PermissionRepository.getGroupedPermissions({
+            attributes: ["id","key", "description"],
+            order: [["key", "ASC"]],
+        });
         if (!allGroupedPermission) {
             throw new AppError("No permission found");
         }
