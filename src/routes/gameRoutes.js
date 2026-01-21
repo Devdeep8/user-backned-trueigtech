@@ -71,6 +71,15 @@ gameRoutes.put(
   gameController.updateGame,
 );
 
+gameRoutes.patch(
+  "/bulk-status",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["game.update"],
+  }),
+  gameController.bulkUpdate,
+);
+
 // Protected routes
 // gameRoutes.get("/me", authMiddleware.authenticate, gameController.me);
 
