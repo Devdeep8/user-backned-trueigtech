@@ -1,5 +1,5 @@
 // models/Game.js
-import { DataTypes } from "sequelize";
+import { DataTypes } from "@sequelize/core";
 import { sequelize } from "../config/db.js";
 export const Games = sequelize.define(
   "Game",

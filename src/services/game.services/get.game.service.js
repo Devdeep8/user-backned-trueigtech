@@ -1,6 +1,5 @@
 // src/services/game.services/getAll.games.service.js
 import { GenericGetService } from "../../RESTapi/genericGetAPi.js";
-
 class GetAllGamesService extends GenericGetService {
   async run() {
     // Backend filters specific to this entity
@@ -11,7 +10,15 @@ class GetAllGamesService extends GenericGetService {
       backendFilters
     );
 
-
+    const data = await this.buildPaginatedSqlQuery({
+      table: "games",
+      where,
+      limit,
+      offset,
+      page,
+    });
+    
+    console.log(data);
 
     // Query database
     const { rows: games, count: total } = await this.db.game.findAndCountAll({
@@ -20,7 +27,7 @@ class GetAllGamesService extends GenericGetService {
       offset,
     });
 
-    return {meta:{ page, limit, total}, games };
+    return { meta: { page, limit, total }, games, data };
   }
 }
 

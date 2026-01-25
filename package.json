@@ -16,6 +16,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.23.0",
   "dependencies": {
+    "@sequelize/core": "7.0.0-alpha.42",
+    "@sequelize/postgres": "7.0.0-alpha.47",
     "amqplib": "^0.10.9",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",

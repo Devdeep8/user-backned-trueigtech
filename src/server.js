@@ -52,8 +52,7 @@ app.get("/health", async (req, res) => {
 
 // ✅ Connect to DB first, then start server
 const startServer = async () => {
-  // await connectDB();
-
+  await connectDB()
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });

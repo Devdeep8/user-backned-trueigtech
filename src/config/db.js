@@ -1,32 +1,24 @@
 // src/config/database.js
-import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
+import { Sequelize } from "@sequelize/core";
+import { PostgresDialect } from "@sequelize/postgres";
 import AppError from "../utils/appError.js";
 
 dotenv.config();
-// Docker Connection String:
-// Protocol: postgres
-// User: admin
-// Pass: admin
-// Host: db (This is the name from docker-compose.yml)
-// DB Name: userdb
-export const sequelize = new Sequelize(process.env.DATABASE_URL, {
+
+export const sequelize = new Sequelize({
+  dialect: PostgresDialect,
+  url: process.env.DATABASE_URL,
   logging: process.env.DB_LOGGING === "true" ? console.log : false,
 });
 
-// Function to test the connection
+// Test connection
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(
-      "✅ Connection to PostgreSQL has been established successfully.",
-    );
-    console.log("✅ Database Synced (Tables checked/created).");
+    console.log("✅ PostgreSQL connected successfully.");
   } catch (error) {
-    console.error("❌ Unable to connect to the database:", error);
-    throw new AppError("Database not authenticated", 502, {
-      cause: error,
-      meta: { db: process.env.DATABASE_URL },
-    });
+    console.error("❌ Unable to connect:", error);
+    throw new AppError("Database not authenticated", 502, { cause: error });
   }
 };
