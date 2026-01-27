@@ -1,4 +1,7 @@
 import authService from "../services/auth.service.js";
+import LoginService from "../services/auth.services/login.service.js";
+import AppError from "../utils/appError.js";
+import db from "../model/db.js";
 import {
   clearAuthCookies,
   setAccessTokenCookie,
@@ -8,7 +11,7 @@ class AuthController {
   async register(req, res, next) {
     try {
       const { name, email, password } = req.body;
-      const result = await authService.register(name, email, password,);
+      const result = await authService.register(name, email, password);
 
       setAccessTokenCookie(res, result.accessToken);
       setRefreshTokenCookie(res, result.refreshToken);
@@ -28,10 +31,25 @@ class AuthController {
 
   async login(req, res, next) {
     const { email, password } = req.body;
+    const config = {
+      ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
+      REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
+      ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
+      REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
+      TOKEN_ISSUER: process.env.TOKEN_ISSUER,
+    };
     try {
-      const result = await authService.login(email, password);
+      const loginService = new LoginService(
+        AppError,
+        { email, password },
+        { config },
+        db,
+      );
+      const result = await loginService.run();
       setAccessTokenCookie(res, result.accessToken);
       setRefreshTokenCookie(res, result.refreshToken);
+      // const result = await authService.login(email, password);
+
       return res.status(200).json({
         success: true,
         message: "User logged in successfully",

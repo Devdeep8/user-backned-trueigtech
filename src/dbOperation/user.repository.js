@@ -9,11 +9,9 @@ class UserRepository {
       include: [
         {
           model: Role,
-          as: "userRole",
           include: [
             {
               model: Permission,
-              as: "permissions",
               through: { attributes: [] },
             },
           ],
@@ -28,11 +26,9 @@ class UserRepository {
       include: [
         {
           model: Role,
-          as: "userRole",
           include: [
             {
               model: Permission,
-              as: "permissions",
               through: { attributes: [] },
             },
           ],
@@ -53,11 +49,9 @@ class UserRepository {
       include: [
         {
           model: Role,
-          as: "userRole",
           include: [
             {
               model: Permission,
-              as: "permissions",
               through: { attributes: [] },
             },
           ],

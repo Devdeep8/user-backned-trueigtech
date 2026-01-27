@@ -5,13 +5,14 @@ import { Role } from "./role.model.js";
 import { Permission } from "./permission.model.js";
 import { sequelize } from "../config/db.js";
 
+// associateModels(); // Called in server.js
 // Create a single db object
 const db = {
   user: User,
   game: Games,
   role: Role,
   permission: Permission,
-  sequelize: sequelize
+  sequelize: sequelize, 
 };
 
 export default db;

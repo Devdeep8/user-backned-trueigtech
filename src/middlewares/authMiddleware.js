@@ -7,7 +7,7 @@ import userRepository from "../dbOperation/user.repository.js";
 class AuthMiddleware {
   async authenticate(req, res, next) {
     try {
-      // 🔥 Read token from cookies (NOT headers)
+      // Read token from cookies (NOT headers)
       const token = req.cookies.accessToken;
 
       if (!token) {
@@ -15,10 +15,11 @@ class AuthMiddleware {
       }
 
       const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+      // console.log(decoded , "debug");
 
       // INSTANT CHECK: Validate against DB
       const user = await userRepository.getUserByIdentifier({id : decoded.userId})
-
+      // console.log(user , "debug");
       if (!user) {
         throw new AppError("User no longer exists", 401);
       }
@@ -27,11 +28,15 @@ class AuthMiddleware {
         throw new AppError("User account is suspended", 401);
       }
 
+      console.log(user.userRole.name , decoded.role , "debug")
+
       // Optional: Check if role changed
       if (user.userRole.name !== decoded.role) {
         // Role changed, force refresh to get new token
         throw new AppError("Role changed, please login again", 401);
       }
+
+      console.log(user)
 
       // Attach user to request
       req.user = {
@@ -40,6 +45,7 @@ class AuthMiddleware {
         email: user.email,
         permissions: user.userRole.permissions.map((p) => p.key),
       };
+      console.log(req.user , "debug")
 
       next();
     } catch (error) {

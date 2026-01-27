@@ -5,7 +5,8 @@ import { QueryTypes } from "sequelize";
 class GetAllGamesService extends GenericGetService {
   async run() {
     const backendFilters = {};
-    const { where, limit, offset, page } = await this.buildQuery(backendFilters);
+    const { where, limit, offset, page } =
+      await this.buildQuery(backendFilters);
 
     console.log("WHERE (filters):", where);
     console.log("LIMIT (per page):", limit);
@@ -19,25 +20,32 @@ class GetAllGamesService extends GenericGetService {
     let replacements = {};
 
     // SEARCH FILTER
-    const searchTerm = this.query?.search || this.params?.search || where?.search;
-    
+    const searchTerm =
+      this.query?.search || this.params?.search || where?.search;
+
     if (searchTerm) {
-      whereConditions.push('(name ILIKE :search OR description ILIKE :search)');
+      whereConditions.push("(name ILIKE :search OR description ILIKE :search)");
       replacements.search = `%${searchTerm}%`;
     }
 
     // OTHER FILTERS from 'where' object
     Object.entries(where).forEach(([key, value]) => {
       console.log(key, value);
-      if (key !== 'deletedAt' && key !== 'search' && value !== null && value !== undefined) {
+      if (
+        key !== "deletedAt" &&
+        key !== "search" &&
+        value !== null &&
+        value !== undefined
+      ) {
         whereConditions.push(`"${key}" = :${key}`); // ✅ Quotes for camelCase
         replacements[key] = value;
       }
     });
 
-    const whereClause = whereConditions.length > 0 
-      ? `WHERE ${whereConditions.join(" AND ")}`
-      : "";
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(" AND ")}`
+        : "";
 
     console.log("SQL WHERE:", whereClause);
     console.log("SQL Replacements:", replacements);
@@ -83,24 +91,24 @@ class GetAllGamesService extends GenericGetService {
     try {
       const [countResult] = await this.db.sequelize.query(countQuery, {
         replacements,
-        type: QueryTypes.SELECT
+        type: QueryTypes.SELECT,
       });
 
       const games = await this.db.sequelize.query(dataQuery, {
         replacements,
-        type: QueryTypes.SELECT
+        type: QueryTypes.SELECT,
       });
 
       const total = parseInt(countResult.total);
 
-      return { 
-        meta: { 
+      return {
+        meta: {
           page,
           limit,
           total,
-          totalPages: Math.ceil(total / limit)
-        }, 
-        games 
+          totalPages: Math.ceil(total / limit),
+        },
+        games,
       };
     } catch (error) {
       console.error("SQL Query Error:", error);

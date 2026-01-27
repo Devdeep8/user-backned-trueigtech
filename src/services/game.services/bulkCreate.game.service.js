@@ -18,7 +18,7 @@ class BulkCreateGameService extends BaseService {
       genre: g.genre?.trim() || null,
       imageUrl: g.imageUrl?.trim() || null,
       gameUrl: g.gameUrl?.trim() || null,
-      isActive: g.isActive === "true" || g.isActive === true,
+      isActive: g.isActive === "TRUE" || g.isActive === true,
     }));
 
     try {

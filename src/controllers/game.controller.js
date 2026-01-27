@@ -134,7 +134,7 @@ class GameController {
               genre: row.genre || null,
               imageUrl: row.imageUrl || null,
               gameUrl: row.gameUrl || null,
-              isActive: row.isActive === "true" || row.isActive === true,
+              isActive: row.isActive === "TRUE" || row.isActive === true,
             });
           })
           .on("end", resolve)
