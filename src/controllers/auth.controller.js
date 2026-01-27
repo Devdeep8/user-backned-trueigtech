@@ -7,11 +7,28 @@ import {
   setAccessTokenCookie,
   setRefreshTokenCookie,
 } from "../utils/cookie.js";
+import RegisterService from "../services/auth.services/register.service.js";
 class AuthController {
   async register(req, res, next) {
+    const { name, email, password } = req.body;
+     const config = {
+      ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
+      REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
+      ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
+      REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
+      TOKEN_ISSUER: process.env.TOKEN_ISSUER,
+  
+    };
     try {
-      const { name, email, password } = req.body;
-      const result = await authService.register(name, email, password);
+
+      const registerService = new RegisterService(
+        AppError,
+        { name, email, password },
+        { config },
+        db,
+      );
+      const result = await registerService.run();
+      // const result = await authService.register(name, email, password);
 
       setAccessTokenCookie(res, result.accessToken);
       setRefreshTokenCookie(res, result.refreshToken);

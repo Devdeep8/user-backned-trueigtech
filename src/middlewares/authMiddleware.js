@@ -28,7 +28,6 @@ class AuthMiddleware {
         throw new AppError("User account is suspended", 401);
       }
 
-      console.log(user.userRole.name , decoded.role , "debug")
 
       // Optional: Check if role changed
       if (user.userRole.name !== decoded.role) {
@@ -36,7 +35,6 @@ class AuthMiddleware {
         throw new AppError("Role changed, please login again", 401);
       }
 
-      console.log(user)
 
       // Attach user to request
       req.user = {
@@ -45,7 +43,6 @@ class AuthMiddleware {
         email: user.email,
         permissions: user.userRole.permissions.map((p) => p.key),
       };
-      console.log(req.user , "debug")
 
       next();
     } catch (error) {
