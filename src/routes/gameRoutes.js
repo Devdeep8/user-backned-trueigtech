@@ -62,7 +62,7 @@ gameRoutes.delete(
   gameController.deleteGame,
 );
 
-gameRoutes.put(
+gameRoutes.patch(
   "/update/:id",
   authMiddleware.authenticate,
   authMiddleware.authorize({

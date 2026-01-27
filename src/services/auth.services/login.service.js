@@ -6,8 +6,16 @@ import bcrypt from "bcryptjs";
 class LoginService extends BaseService {
   async run() {
     const { email, password } = this.args;
-    const { config } = this.context;
+    const { ACCESS_TOKEN_SECRET , REFRESH_TOKEN_SECRET , ACCESS_TOKEN_TTL , REFRESH_TOKEN_TTL , TOKEN_ISSUER , requestId } = this.context;
 
+    const config = {
+      ACCESS_TOKEN_SECRET,
+      REFRESH_TOKEN_SECRET,
+      ACCESS_TOKEN_TTL,
+      REFRESH_TOKEN_TTL,
+      TOKEN_ISSUER,
+      requestId,
+    };
     if (!email) {
       throw new this.error("Email is required", 400);
     }

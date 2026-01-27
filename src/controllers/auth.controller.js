@@ -1,4 +1,3 @@
-import authService from "../services/auth.service.js";
 import LoginService from "../services/auth.services/login.service.js";
 import AppError from "../utils/appError.js";
 import db from "../model/db.js";
@@ -49,37 +48,42 @@ class AuthController {
 
   async login(req, res, next) {
     const { email, password } = req.body;
-    const config = {
-      ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
-      REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
-      ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
-      REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
-      TOKEN_ISSUER: process.env.TOKEN_ISSUER,
-    };
+
     try {
       const loginService = new LoginService(
         AppError,
         { email, password },
-        { config },
+        {
+          ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
+          REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
+          ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
+          REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
+          TOKEN_ISSUER: process.env.TOKEN_ISSUER,
+          requestId: req.requestId,
+        },
         db,
       );
-      const result = await loginService.run();
-      setAccessTokenCookie(res, result.accessToken);
-      setRefreshTokenCookie(res, result.refreshToken);
+      const result = await loginService.execute();
+      console.log(result, "result");
+      setAccessTokenCookie(res, result.data.accessToken);
+      setRefreshTokenCookie(res, result.data.refreshToken);
       // const result = await authService.login(email, password);
 
       return res.status(200).json({
         success: true,
         message: "User logged in successfully",
         data: {
-          user: result.user,
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
+          user: result.data.user,
+          accessToken: result.data.accessToken,
+          refreshToken: result.data.refreshToken,
         },
       });
     } catch (error) {
-      console.log(error);
-      next(error);
+      return res.status(error.statusCode || 400).json({
+        success: false,
+        message: error.message || "Something went wrong",
+        meta: error.meta || null,
+      });
     }
   }
   async refresh(req, res, next) {
@@ -108,7 +112,6 @@ class AuthController {
         db,
       );
       const tokens = await refreshService.run();
-    
 
       // Rotate tokens
       setAccessTokenCookie(res, tokens.accessToken);

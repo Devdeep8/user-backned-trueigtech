@@ -11,6 +11,7 @@ import errorHandler from "./middlewares/errormiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import roleRoutes from "./routes/rolesRoutes.js";
 import permissionRoutes from "./routes/permissionroute.js";
+import { requestIdMiddleware } from "./middlewares/middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 6001;
@@ -25,6 +26,9 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(requestIdMiddleware);
+
 
 // Routes
 app.use("/api/auth", authRoutes);
