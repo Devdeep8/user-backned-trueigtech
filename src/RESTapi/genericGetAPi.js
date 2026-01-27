@@ -1,9 +1,9 @@
 // src/services/generic/get.service.js
 import { BaseService } from "../services/base.service.js";
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "@sequelize/core";
 
 export class GenericGetService extends BaseService {
- async buildQuery(backendFilters = {}) {
+  async buildQuery(backendFilters = {}) {
     const { filter = {}, search, sort, pagination, dateRange } = this.args;
     const { user } = this.context;
 
@@ -47,20 +47,20 @@ export class GenericGetService extends BaseService {
     Object.entries(where).forEach(([key, value]) => {
       // NULL check
       if (value === null) {
-        conditions.push(`${key} IS NULL`);
+        conditions.push(`"${key}" IS NULL`);
         return;
       }
 
       // Operators
       if (typeof value === "object") {
         if (value[Op.iLike]) {
-          conditions.push(`${key} ILIKE :${key}`);
+          conditions.push(`"${key}" ILIKE :${key}`);
           replacements[key] = value[Op.iLike];
           return;
         }
 
         if (value[Op.between]) {
-          conditions.push(`${key} BETWEEN :${key}From AND :${key}To`);
+          conditions.push(`"${key}" BETWEEN :${key}From AND :${key}To`);
           replacements[`${key}From`] = value[Op.between][0];
           replacements[`${key}To`] = value[Op.between][1];
           return;
@@ -68,7 +68,7 @@ export class GenericGetService extends BaseService {
       }
 
       // Normal equality
-      conditions.push(`${key} = :${key}`);
+      conditions.push(`"${key}" = :${key}`);
       replacements[key] = value;
     });
 
@@ -78,7 +78,7 @@ export class GenericGetService extends BaseService {
 
     return { whereClause, replacements };
   }
-   async buildPaginatedSqlQuery({
+  async buildPaginatedSqlQuery({
     table,
     where,
     page = 1,
@@ -90,12 +90,11 @@ export class GenericGetService extends BaseService {
 
     /* 1️⃣ WHERE */
     const { whereClause, replacements } = await this.buildSqlWhere(where);
+    console.log(whereClause, replacements, "debug");
 
     /* 2️⃣ SELECT columns */
     const selectColumns =
-      columns[0] === "*"
-        ? "*"
-        : columns.map((c) => `"${c}"`).join(", ");
+      columns[0] === "*" ? "*" : columns.map((c) => `"${c}"`).join(", ");
 
     /* 3️⃣ ORDER BY (safe backend-controlled) */
     const orderClause = Object.entries(orderBy)
@@ -131,6 +130,8 @@ export class GenericGetService extends BaseService {
       },
       type: QueryTypes.SELECT,
     });
+
+    console.log(data, "debug");
 
     return {
       meta: {

@@ -20,9 +20,9 @@ export const User = sequelize.define(
       unique: true,
     },
     role: {
-  type: DataTypes.ENUM("admin", "user"),
-  defaultValue: "user",
-},
+      type: DataTypes.ENUM("admin", "user"),
+      defaultValue: "user",
+    },
 
     password: {
       type: DataTypes.STRING,
@@ -47,10 +47,6 @@ export const User = sequelize.define(
     roleId: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: {
-        model: "roles",
-        key: "id",
-      },
     },
   },
   {

@@ -5,18 +5,25 @@ import { Permission } from "./permission.model.js";
 
 // Define associations in a separate function
 export const associateModels = () => {
-  User.belongsTo(Role, { foreignKey: "roleId", as: "userRole" });
-  Role.hasMany(User, { foreignKey: "roleId", as: "users" });
+  User.belongsTo(Role, {
+    foreignKey: "roleId",
+    as: "userRole",
+    inverse: { type: "hasMany", as: "users" },
+  });
+  Role.hasMany(User, {
+    foreignKey: "roleId",
+    as: "users",
+    inverse: { type: "belongsTo", as: "userRole" },
+  });
 
   Role.belongsToMany(Permission, {
     through: "RolePermissions",
     as: "permissions",
     foreignKey: "roleId",
-  });
-  Permission.belongsToMany(Role, {
-    through: "RolePermissions",
-    as: "roles",
-    foreignKey: "permissionId",
+    inverse: {
+      as: "roles",
+      foreignKey: "permissionId",
+    },
   });
 };
 

@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./config/db.js";
+import { associateModels } from "./model/index.js";
 import { userRouter } from "./routes/user.routes/route.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import errorHandler from "./middlewares/errormiddleware.js";
@@ -52,7 +53,8 @@ app.get("/health", async (req, res) => {
 
 // ✅ Connect to DB first, then start server
 const startServer = async () => {
-  await connectDB()
+  await connectDB();
+  associateModels();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });

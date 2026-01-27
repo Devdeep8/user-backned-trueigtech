@@ -1,33 +1,111 @@
 // src/services/game.services/getAll.games.service.js
 import { GenericGetService } from "../../RESTapi/genericGetAPi.js";
+import { QueryTypes } from "sequelize";
+
 class GetAllGamesService extends GenericGetService {
   async run() {
-    // Backend filters specific to this entity
-    const backendFilters = {}; // default for normal users
+    const backendFilters = {};
+    const { where, limit, offset, page } = await this.buildQuery(backendFilters);
 
-    // Build query parameters using GenericGetService
-    const { where, limit, offset, page } = await this.buildQuery(
-      backendFilters
-    );
+    console.log("WHERE (filters):", where);
+    console.log("LIMIT (per page):", limit);
+    console.log("OFFSET (skip):", offset);
+    console.log("PAGE (current):", page);
 
-    const data = await this.buildPaginatedSqlQuery({
-      table: "games",
-      where,
-      limit,
-      offset,
-      page,
-    });
+    // ============================================
+    // BUILD WHERE CLAUSE - WITH PROPER QUOTES
+    // ============================================
+    let whereConditions = ['"deletedAt" IS NULL']; // ✅ Add quotes!
+    let replacements = {};
+
+    // SEARCH FILTER
+    const searchTerm = this.query?.search || this.params?.search || where?.search;
     
-    console.log(data);
+    if (searchTerm) {
+      whereConditions.push('(name ILIKE :search OR description ILIKE :search)');
+      replacements.search = `%${searchTerm}%`;
+    }
 
-    // Query database
-    const { rows: games, count: total } = await this.db.game.findAndCountAll({
-      where,
-      limit,
-      offset,
+    // OTHER FILTERS from 'where' object
+    Object.entries(where).forEach(([key, value]) => {
+      console.log(key, value);
+      if (key !== 'deletedAt' && key !== 'search' && value !== null && value !== undefined) {
+        whereConditions.push(`"${key}" = :${key}`); // ✅ Quotes for camelCase
+        replacements[key] = value;
+      }
     });
 
-    return { meta: { page, limit, total }, games, data };
+    const whereClause = whereConditions.length > 0 
+      ? `WHERE ${whereConditions.join(" AND ")}`
+      : "";
+
+    console.log("SQL WHERE:", whereClause);
+    console.log("SQL Replacements:", replacements);
+
+    // ============================================
+    // COUNT QUERY
+    // ============================================
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM games
+      ${whereClause}
+    `;
+
+    // ============================================
+    // DATA QUERY
+    // ============================================
+    const dataQuery = `
+      SELECT 
+        id,
+        name,
+        description,
+        "genre",
+        "imageUrl",
+        "gameUrl",
+        "rating",
+        "isActive",
+        "createdAt",
+        "updatedAt",
+        "deletedAt"
+      FROM games
+      ${whereClause}
+      ORDER BY "createdAt" DESC
+      LIMIT :limit
+      OFFSET :offset
+    `;
+
+    replacements.limit = limit;
+    replacements.offset = offset;
+
+    // ============================================
+    // EXECUTE QUERIES
+    // ============================================
+    try {
+      const [countResult] = await this.db.sequelize.query(countQuery, {
+        replacements,
+        type: QueryTypes.SELECT
+      });
+
+      const games = await this.db.sequelize.query(dataQuery, {
+        replacements,
+        type: QueryTypes.SELECT
+      });
+
+      const total = parseInt(countResult.total);
+
+      return { 
+        meta: { 
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }, 
+        games 
+      };
+    } catch (error) {
+      console.error("SQL Query Error:", error);
+      throw error;
+    }
   }
 }
 
