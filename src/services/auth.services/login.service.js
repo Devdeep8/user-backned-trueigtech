@@ -1,6 +1,24 @@
 import { TokenService } from "../../utils/token.service.js";
 import { BaseService } from "../base.service.js";
 import bcrypt from "bcryptjs";
+
+function ttlToMs(ttl) {
+  const unit = ttl.slice(-1); // last character: d, h, m, s
+  const value = parseInt(ttl.slice(0, -1)); // number part
+
+  switch (unit) {
+    case 'd':
+      return value * 24 * 60 * 60 * 1000; // days to ms
+    case 'h':
+      return value * 60 * 60 * 1000; // hours to ms
+    case 'm':
+      return value * 60 * 1000; // minutes to ms
+    case 's':
+      return value * 1000; // seconds to ms
+    default:
+      throw new Error('Invalid TTL format');
+  }
+}
 class LoginService extends BaseService {
   async run() {
     const { email, password } = this.args;
@@ -47,6 +65,9 @@ class LoginService extends BaseService {
     const accessToken = tokenService.createAccessToken(payload);
     const refreshToken = tokenService.createRefreshToken(payload);
 
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpiresAt = new Date(Date.now() + ttlToMs(config.REFRESH_TOKEN_TTL));
+    await user.save();
     return { accessToken, refreshToken };
   }
 }
