@@ -188,7 +188,6 @@ class GameController {
 
       const pagination = { page, limit };
       const dateRange = req.query.dateRange || "";
-      console.log(search, "api call in search");
       const filter = {};
       if (status) filter.isActive = status === "active" ? true : false;
       if (genre) filter.genre = genre;

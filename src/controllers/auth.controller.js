@@ -101,9 +101,6 @@ class AuthController {
         });
       }
 
-      console.log("refreshToken", refreshToken);
-      console.log("config", config);
-
       const refreshService = new RefreshService(
         AppError,
         { token: refreshToken },
@@ -111,11 +108,11 @@ class AuthController {
         db,
       );
       const tokens = await refreshService.run();
+    
 
       // Rotate tokens
       setAccessTokenCookie(res, tokens.accessToken);
       setRefreshTokenCookie(res, tokens.refreshToken);
-      console.log("tokens", tokens);
       return res.status(200).json({
         success: true,
         message: "Token refreshed successfully",

@@ -1,3 +1,4 @@
+import { ttlToMs } from "../../utils/cookie.js";
 import { TokenService } from "../../utils/token.service.js";
 import { BaseService } from "../base.service.js";
 
@@ -5,9 +6,10 @@ class RefreshService extends BaseService {
     async run() {
         const {token} = this.args
         const { config } = this.context;
-        try {
+        
+       
             const user = await this.db.user.findOne({
-                where: { token },
+                where: { refreshToken : token },
                 include: [
                     {
                         model: this.db.userRole,
@@ -26,22 +28,19 @@ class RefreshService extends BaseService {
                 throw new this.AppError("Refresh token expired", 401);
             }
 
-
-
             const tokenService = new TokenService(config);
             const payload = {
                 userId: user.id,
                 role: user.userRole.name,
             };
+            
             const accessToken = tokenService.createAccessToken(payload);
             const refreshToken = tokenService.createRefreshToken(payload);
             user.refreshToken = refreshToken;
             user.refreshTokenExpiresAt = new Date(Date.now() + ttlToMs(config.REFRESH_TOKEN_TTL));
             await user.save();
             return { accessToken, refreshToken };
-        } catch (error) {
-            throw error;
-        }
+       
     }
 }
 

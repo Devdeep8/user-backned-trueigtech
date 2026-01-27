@@ -10,7 +10,7 @@ export class TokenService {
     this.accessTokenSecret = config.ACCESS_TOKEN_SECRET;
     this.refreshTokenSecret = config.REFRESH_TOKEN_SECRET;
 
-    this.accessTokenTTL = config.ACCESS_TOKEN_TTL || "15m";
+    this.accessTokenTTL = config.ACCESS_TOKEN_TTL || "10m";
     this.refreshTokenTTL = config.REFRESH_TOKEN_TTL || "7d";
 
     this.issuer = config.TOKEN_ISSUER || "auth-service";

@@ -24,3 +24,22 @@ export const clearAuthCookies = (res) => {
 
 
 
+
+export function ttlToMs(ttl) {
+  const unit = ttl.slice(-1); // last character: d, h, m, s
+  const value = parseInt(ttl.slice(0, -1)); // number part
+
+  switch (unit) {
+    case 'd':
+      return value * 24 * 60 * 60 * 1000; // days to ms
+    case 'h':
+      return value * 60 * 60 * 1000; // hours to ms
+    case 'm':
+      return value * 60 * 1000; // minutes to ms
+    case 's':
+      return value * 1000; // seconds to ms
+    default:
+      throw new Error('Invalid TTL format');
+  }
+}
+

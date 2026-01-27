@@ -8,7 +8,6 @@ class LogoutService extends BaseService {
             if (!user) {
                 throw new this.AppError("User not found", 404);
             }
-            console.log(user , "debug");
             user.refreshToken = null;
             user.refreshTokenExpiresAt = null;
             await user.save();

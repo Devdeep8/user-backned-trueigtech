@@ -8,10 +8,6 @@ class GetAllGamesService extends GenericGetService {
     const { where, limit, offset, page } =
       await this.buildQuery(backendFilters);
 
-    console.log("WHERE (filters):", where);
-    console.log("LIMIT (per page):", limit);
-    console.log("OFFSET (skip):", offset);
-    console.log("PAGE (current):", page);
 
     // ============================================
     // BUILD WHERE CLAUSE - WITH PROPER QUOTES
@@ -30,7 +26,7 @@ class GetAllGamesService extends GenericGetService {
 
     // OTHER FILTERS from 'where' object
     Object.entries(where).forEach(([key, value]) => {
-      console.log(key, value);
+        (key, value);
       if (
         key !== "deletedAt" &&
         key !== "search" &&
@@ -47,8 +43,8 @@ class GetAllGamesService extends GenericGetService {
         ? `WHERE ${whereConditions.join(" AND ")}`
         : "";
 
-    console.log("SQL WHERE:", whereClause);
-    console.log("SQL Replacements:", replacements);
+      ("SQL WHERE:", whereClause);
+      ("SQL Replacements:", replacements);
 
     // ============================================
     // COUNT QUERY
