@@ -8,19 +8,20 @@ import {
   setRefreshTokenCookie,
 } from "../utils/cookie.js";
 import RegisterService from "../services/auth.services/register.service.js";
+import LogoutService from "../services/auth.services/logout.service.js";
+import CurrnetUserService from "../services/auth.services/me.service.js";
+import RefreshService from "../services/auth.services/refresh.service.js";
 class AuthController {
   async register(req, res, next) {
     const { name, email, password } = req.body;
-     const config = {
+    const config = {
       ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
       REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
       ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
       REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
       TOKEN_ISSUER: process.env.TOKEN_ISSUER,
-  
     };
     try {
-
       const registerService = new RegisterService(
         AppError,
         { name, email, password },
@@ -82,9 +83,15 @@ class AuthController {
     }
   }
   async refresh(req, res, next) {
+    const refreshToken = req.cookies.refreshToken;
+    const config = {
+      ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
+      REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
+      ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
+      REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
+      TOKEN_ISSUER: process.env.TOKEN_ISSUER,
+    };
     try {
-      const refreshToken = req.cookies.refreshToken;
-
       // If no refresh token at all → logout immediately
       if (!refreshToken) {
         clearAuthCookies(res);
@@ -94,12 +101,21 @@ class AuthController {
         });
       }
 
-      const tokens = await authService.refreshToken(refreshToken);
+      console.log("refreshToken", refreshToken);
+      console.log("config", config);
+
+      const refreshService = new RefreshService(
+        AppError,
+        { token: refreshToken },
+        { config },
+        db,
+      );
+      const tokens = await refreshService.run();
 
       // Rotate tokens
       setAccessTokenCookie(res, tokens.accessToken);
       setRefreshTokenCookie(res, tokens.refreshToken);
-
+      console.log("tokens", tokens);
       return res.status(200).json({
         success: true,
         message: "Token refreshed successfully",
@@ -118,22 +134,14 @@ class AuthController {
 
   async logout(req, res, next) {
     try {
-      await authService.logout(req.user.userId);
-
-      res.cookie("refreshToken", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/api/auth/refresh", // must match original path
-        maxAge: 0, // delete immediately
-      });
-
-      res.cookie("accessToken", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 0, // delete immediately
-      });
+      const logoutService = new LogoutService(
+        AppError,
+        { userId: req.user.userId },
+        { res },
+        db,
+      );
+      await logoutService.run();
+      clearAuthCookies(res);
 
       res.status(200).json({
         success: true,
@@ -144,7 +152,13 @@ class AuthController {
     }
   }
   async me(req, res) {
-    const user = await authService.me(req.user.userId);
+    const currnetUserService = new CurrnetUserService(
+      AppError,
+      { userId: req.user.userId },
+      { res },
+      db,
+    );
+    const user = await currnetUserService.run();
     res.json({
       success: true,
       message: "User retrieved successfully",
