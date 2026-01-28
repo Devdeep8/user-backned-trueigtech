@@ -1,4 +1,4 @@
-// routes/authRoutes.js
+// routes/permissionroute.js  
 
 import express from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -30,12 +30,12 @@ permissionRoutes.patch(
   permissionController.updatePermission,
 );
 permissionRoutes.get(
-    "/group",
-    authMiddleware.authenticate,
-    authMiddleware.authorize({
-      permissions: ["permission.read"],
-    }),
-    permissionController.groupPermission,
-  );
+  "/group",
+  authMiddleware.authenticate,
+  authMiddleware.authorize({
+    permissions: ["permission.read"],
+  }),
+  permissionController.groupPermission,
+);
 
 export default permissionRoutes;

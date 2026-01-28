@@ -1,4 +1,3 @@
-import db from "../model/db.js";
 import BulkCreateGameService from "../services/game.services/bulkCreate.game.service.js";
 import BulkUpdateGamesService from "../services/game.services/bulkupate.game.service.js";
 import GetAllGamesService from "../services/game.services/get.game.service.js";
@@ -7,7 +6,7 @@ import AppError from "../utils/appError.js";
 import fs from "fs";
 import csvParser from "csv-parser";
 import DeleteService from "../services/game.services/softDelete.game.service.js";
-
+import { httpStatus } from "../helper/http-status.js";
 class GameController {
   async createGame(req, res, next) {
     try {
@@ -15,71 +14,52 @@ class GameController {
   }
   async deleteGame(req, res, next) {
     const { gameId } = req.body;
-    try {
-      const deleteService = new DeleteService(
-        AppError,
-        { id: gameId },
-        {
-          user: req.user,
-          requestId: req.requestId,
-        },
-        db,
-      );
-      const result = await deleteService.execute();
-      return res.status(200).json({
-        success: true,
-        message: "Game deleted successfully",
-        data: {
-          game: result,
-        },
-      });
-    } catch (error) {
-      console.error("Delete Game Error:", error.message || error);
-      return res.status(error.statusCode || 400).json({
+
+    const deleteService = new DeleteService(
+      { id: gameId },
+      {
+        user: req.user,
+        requestId: req.requestId,
+      },
+    );
+    const result = await deleteService.execute();
+    if (!result.success) {
+      return res.status(result.error.statusCode).json({
         success: false,
-        message: error.message || "Something went wrong",
-        meta: error.meta || null,
+        message: result.error.message,
+        code: result.error.code,
+        meta: result.meta,
       });
     }
+    return res.status(200).json({
+      success: true,
+      message: "Game deleted successfully",
+      data: {
+        game: result,
+      },
+    });
   }
   async updateGame(req, res, next) {
     try {
       const { id } = req.params;
-      const { data } = req.body;
-      // console.log(id, data);
-      if (!id || !data) {
-        throw new AppError("Game ID or data is missing", 400);
-      }
-      if (!req.user.role) {
-        throw new AppError("Role is missing", 400);
-      }
-
-      const context = {
-        user: req.user, // from auth middleware
-        requestId: req.requestId, // optional
-      };
+      const data = req.body;
 
       const updateGameService = new UpdateGameService(
-        AppError,
         { data, id },
-        context,
-        db,
+        { user: req.user, requestId: req.requestId },
       );
+
       const result = await updateGameService.execute();
 
-      return res.status(200).json({
-        success: true,
-        message: "Game updated successfully",
-        data: {
-          game: result,
-        },
-      });
+      // ✅ One line - BaseService handles everything!
+      return updateGameService.sendResponse(
+        res,
+        result,
+        "Game updated successfully",
+        httpStatus.OK,
+      );
     } catch (error) {
-      return res.status(error.statusCode || 400).json({
-        success: false,
-        message: error.message || "Something went wrong",
-        meta: error.meta || null,
-      });
+      next(error);
     }
   }
   async bulkUpdate(req, res, next) {
@@ -96,10 +76,8 @@ class GameController {
       };
 
       const bulkUpdateGamesService = new BulkUpdateGamesService(
-        AppError,
         { gameIds, isActive },
         context,
-        db,
       );
       const result = await bulkUpdateGamesService.execute();
 
@@ -118,33 +96,7 @@ class GameController {
       });
     }
   }
-  async toggleActive(req, res, next) {
-    try {
-      const { gameId } = req.body;
-      if (!gameId || !req.user.role) {
-        throw new AppError("Game ID or role is missing", 400);
-      }
-      const updateGameService = new UpdateGameService(
-        AppError,
-        { id: gameId, isActive: !req.body.isActive },
-        { user: req.user },
-        db,
-      );
-      const result = await updateGameService.execute();
-      return res.status(200).json({
-        success: true,
-        message: "Game toggled successfully",
 
-        game: result,
-      });
-    } catch (error) {
-      return res.status(error.statusCode || 400).json({
-        success: false,
-        message: error.message || "Something went wrong",
-        meta: error.meta || null,
-      });
-    }
-  }
   async bulkUpload(req, res, next) {
     const file = req.file;
 
@@ -177,14 +129,8 @@ class GameController {
       if (!games.length) throw new AppError("CSV file is empty", 400);
 
       // 2️⃣ Call BulkCreateGameService
-      console.log(games, "debug");
 
-      const service = new BulkCreateGameService(
-        AppError,
-        { games },
-        { user: req.user },
-        db,
-      );
+      const service = new BulkCreateGameService({ games }, { user: req.user });
       const { successful, failed } = await service.run();
       console.log(successful, failed, "debug");
 
@@ -228,10 +174,8 @@ class GameController {
       };
 
       const getAllGamesService = new GetAllGamesService(
-        AppError,
         { filter, search, pagination, dateRange },
         context,
-        db,
       );
       const result = await getAllGamesService.run();
 

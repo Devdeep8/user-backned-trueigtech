@@ -44,15 +44,6 @@ gameRoutes.get(
   gameController.showAllGames,
 );
 
-gameRoutes.patch(
-  "/toggleactive",
-  authMiddleware.authenticate,
-  authMiddleware.authorize({
-    permissions: ["game.update"],
-  }),
-  gameController.toggleActive,
-);
-
 gameRoutes.delete(
   "/delete",
   authMiddleware.authenticate,

@@ -22,10 +22,8 @@ class AuthController {
     };
     try {
       const registerService = new RegisterService(
-        AppError,
         { name, email, password },
         { config },
-        db,
       );
       const result = await registerService.run();
       // const result = await authService.register(name, email, password);
@@ -50,7 +48,6 @@ class AuthController {
     const { email, password } = req.body;
 
     const loginService = new LoginService(
-      AppError,
       { email, password },
       {
         ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
@@ -60,7 +57,6 @@ class AuthController {
         TOKEN_ISSUER: process.env.TOKEN_ISSUER,
         requestId: req.requestId,
       },
-      db,
     );
 
     const result = await loginService.execute();
@@ -110,10 +106,8 @@ class AuthController {
       }
 
       const refreshService = new RefreshService(
-        AppError,
         { token: refreshToken },
         { config },
-        db,
       );
       const tokens = await refreshService.run();
 
@@ -157,10 +151,8 @@ class AuthController {
   }
   async me(req, res) {
     const currnetUserService = new CurrnetUserService(
-      AppError,
       { userId: req.user.userId },
       { res },
-      db,
     );
     const user = await currnetUserService.run();
     res.json({

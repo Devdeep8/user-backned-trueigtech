@@ -1,0 +1,65 @@
+// constants/http-status.js
+
+export const httpStatus = {
+  // Success
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+
+  // Client Errors
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+
+  // Server Errors
+  INTERNAL_SERVER_ERROR: 500,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+};
+
+// Error codes for better API responses
+export const ERROR_CODES = {
+  BAD_REQUEST: 'BAD_REQUEST',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  RATE_LIMIT: 'RATE_LIMIT_EXCEEDED',
+  INTERNAL_ERROR: 'INTERNAL_SERVER_ERROR',
+  BAD_GATEWAY: 'BAD_GATEWAY',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  GATEWAY_TIMEOUT: 'GATEWAY_TIMEOUT',
+};
+
+// Map status codes to error codes
+export const STATUS_TO_CODE = {
+  400: ERROR_CODES.BAD_REQUEST,
+  401: ERROR_CODES.UNAUTHORIZED,
+  403: ERROR_CODES.FORBIDDEN,
+  404: ERROR_CODES.NOT_FOUND,
+  409: ERROR_CODES.CONFLICT,
+  422: ERROR_CODES.VALIDATION_ERROR,
+  429: ERROR_CODES.RATE_LIMIT,
+  500: ERROR_CODES.INTERNAL_ERROR,
+  502: ERROR_CODES.BAD_GATEWAY,
+  503: ERROR_CODES.SERVICE_UNAVAILABLE,
+  504: ERROR_CODES.GATEWAY_TIMEOUT,
+};
+
+// Helper function to get error code from status
+export const getErrorCode = (statusCode) => {
+  return STATUS_TO_CODE[statusCode] || ERROR_CODES.INTERNAL_ERROR;
+};
+
+// Helper function to determine error type
+export const getErrorType = (statusCode) => {
+  if (statusCode >= 400 && statusCode < 500) return 'CLIENT_ERROR';
+  if (statusCode >= 500) return 'SERVER_ERROR';
+  return 'UNKNOWN';
+};
