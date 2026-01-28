@@ -1,9 +1,20 @@
 import { BaseService } from "../base.service.js";
-import roleRepository from "../../dbOperation/role.repository.js";
 
 class GetRoleWithPermissionsService extends BaseService {
   async run() {
-    const getRolesWithPermissions = await roleRepository.roleWithPermissions();
+    const getRolesWithPermissions = await this.db.role.findAll({
+      attributes: {
+        exclude: ["createdAt", "updatedAt" , "description"],
+      },
+      include: [
+        {
+          model: this.db.permission,
+          attributes: {
+            exclude: ["createdAt", "updatedAt" , "description"],
+          },
+        },
+      ],
+    });
     if (!getRolesWithPermissions) {
       throw new this.error("Roles not found", this.httpStatus.NOT_FOUND);
     }

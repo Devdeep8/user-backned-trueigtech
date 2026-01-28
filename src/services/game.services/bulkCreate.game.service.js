@@ -6,7 +6,8 @@ class BulkCreateGameService extends BaseService {
     const { user } = this.context;
 
     if (!games || !games.length) throw this.error("No games provided", 400);
-
+    console.log(games, "debug");
+    
     const successful = [];
     const failed = [];
 
@@ -20,6 +21,7 @@ class BulkCreateGameService extends BaseService {
       gameUrl: g.gameUrl?.trim() || null,
       isActive: g.isActive === "TRUE" || g.isActive === true,
     }));
+
 
     try {
       const createdGames = await this.db.game.bulkCreate(normalizedGames, {

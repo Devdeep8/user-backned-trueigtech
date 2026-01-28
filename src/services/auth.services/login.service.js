@@ -27,10 +27,10 @@ class LoginService extends BaseService {
 
     // Validation
     if (!email) {
-      throw new this.error("Email is required", 400);
+      throw new this.error("Email is required", this.httpStatus.BAD_REQUEST);
     }
     if (!password) {
-      throw new this.error("Password is required", 400);
+      throw new this.error("Password is required", this.httpStatus.BAD_REQUEST);
     }
 
     // Find user

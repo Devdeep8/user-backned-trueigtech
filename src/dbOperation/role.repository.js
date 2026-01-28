@@ -30,9 +30,9 @@ class RoleRepository {
         {
           model: Permission,
           as: "permissions",
-          attributes: ["id", "key"], // 👈 only what UI needs
+          attributes: ["id", "key"], 
           through: {
-            attributes: [], // 👈 REMOVE RolePermissions completely
+            attributes: [],   
           },
         },
       ],
