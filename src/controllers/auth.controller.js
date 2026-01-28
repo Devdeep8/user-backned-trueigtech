@@ -45,46 +45,50 @@ class AuthController {
       next(error);
     }
   }
-
+  // auth.controller.js
   async login(req, res, next) {
     const { email, password } = req.body;
 
-    try {
-      const loginService = new LoginService(
-        AppError,
-        { email, password },
-        {
-          ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
-          REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
-          ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
-          REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
-          TOKEN_ISSUER: process.env.TOKEN_ISSUER,
-          requestId: req.requestId,
-        },
-        db,
-      );
-      const result = await loginService.execute();
-      console.log(result, "result");
-      setAccessTokenCookie(res, result.data.accessToken);
-      setRefreshTokenCookie(res, result.data.refreshToken);
-      // const result = await authService.login(email, password);
+    const loginService = new LoginService(
+      AppError,
+      { email, password },
+      {
+        ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
+        REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
+        ACCESS_TOKEN_TTL: process.env.ACCESS_TOKEN_TTL,
+        REFRESH_TOKEN_TTL: process.env.REFRESH_TOKEN_TTL,
+        TOKEN_ISSUER: process.env.TOKEN_ISSUER,
+        requestId: req.requestId,
+      },
+      db,
+    );
 
-      return res.status(200).json({
-        success: true,
-        message: "User logged in successfully",
-        data: {
-          user: result.data.user,
-          accessToken: result.data.accessToken,
-          refreshToken: result.data.refreshToken,
-        },
-      });
-    } catch (error) {
-      return res.status(error.statusCode || 400).json({
+    const result = await loginService.execute();
+
+    // Handle error response
+    if (!result.success) {
+      return res.status(result.error.statusCode).json({
         success: false,
-        message: error.message || "Something went wrong",
-        meta: error.meta || null,
+        message: result.error.message,
+        code: result.error.code,
+        meta: result.meta,
       });
     }
+
+    // Handle success response
+    setAccessTokenCookie(res, result.data.accessToken);
+    setRefreshTokenCookie(res, result.data.refreshToken);
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged in successfully",
+      data: {
+        user: result.data.user,
+        accessToken: result.data.accessToken,
+        refreshToken: result.data.refreshToken,
+      },
+      meta: result.meta,
+    });
   }
   async refresh(req, res, next) {
     const refreshToken = req.cookies.refreshToken;

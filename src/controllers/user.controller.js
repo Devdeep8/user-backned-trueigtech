@@ -4,11 +4,11 @@ import AppError from "../utils/appError.js";
 
 class UserController {
   async createUser(req , res ,next) {
-    const {data} = req.body;
+    const {data} = req.body;   
     console.log("Debug data",data)
     try {
       const user = await userService.createUser(data);
-      if (!user){
+      if (!user){ 
         throw new AppError("user not created" , 500)
       }
       res.status(201).json({
