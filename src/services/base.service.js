@@ -1,5 +1,9 @@
 // base.service.js
-import { getErrorCode, getErrorType, httpStatus } from "../helper/http-status.js";
+import {
+  getErrorCode,
+  getErrorType,
+  httpStatus,
+} from "../helper/http-status.js";
 import db from "../model/db.js";
 import AppError from "../utils/appError.js";
 
@@ -20,23 +24,26 @@ export class BaseService {
       this.logSuccess();
       return this.buildSuccessResponse(result);
     } catch (error) {
+      const validationError =
+        error instanceof AppError
+          ? error
+          : new AppError(
+              "Internal server error",
+              httpStatus.INTERNAL_SERVER_ERROR,
+              "SERVER_ERROR",
+            );
       // Log the error for debugging
-      console.error(`[${this.serviceName}] Error:`, {
-        message: error.message,
-        code: error.code || "INTERNAL_ERROR",
-        statusCode: error.statusCode || 500,
-        requestId: this.context?.requestId,
-        timestamp: new Date().toISOString(),
-      });
+      this.logError(validationError.message);
+
       // Return standardized error format instead of throwing
-      return this.buildErrorResponse(error);
+      return this.buildErrorResponse(validationError);
     }
   }
 
   async run() {
     throw new Error("Method not implemented");
   }
-   /**
+  /**
    * Build standardized success response
    */
   buildSuccessResponse(result) {
@@ -56,7 +63,8 @@ export class BaseService {
    * Build standardized error response with proper error codes
    */
   buildErrorResponse(error) {
-    const statusCode = error.statusCode || this.httpStatus.INTERNAL_SERVER_ERROR;
+    const statusCode =
+      error.statusCode || this.httpStatus.INTERNAL_SERVER_ERROR;
     const errorCode = getErrorCode(statusCode);
     const errorType = getErrorType(statusCode);
 
@@ -81,7 +89,12 @@ export class BaseService {
    * Send response to client
    * Handles both success and error responses in one method
    */
-  sendResponse(res, result, successMessage = "Operation successful", successCode = this.httpStatus.OK) {
+  sendResponse(
+    res,
+    result,
+    successMessage = "Operation successful",
+    successCode = this.httpStatus.OK,
+  ) {
     // Handle error response
     if (!result.success) {
       return res.status(result.error.statusCode).json({
@@ -108,11 +121,20 @@ export class BaseService {
   logSuccess(message = "Operation successful") {
     console.log(`[${this.serviceName}] ✓ Success`, {
       message: message,
-      service: this.serviceName,  
+      service: this.serviceName,
       executionTime: `${Date.now() - this.startTime}ms`,
       requestId: this.context?.requestId,
       timestamp: new Date().toISOString(),
     });
   }
 
+  logError(message = "Operation failed") {
+    console.error(`[${this.serviceName}] ✗ Error`, {
+      message: message,
+      service: this.serviceName,
+      executionTime: `${Date.now() - this.startTime}ms`,
+      requestId: this.context?.requestId,
+      timestamp: new Date().toISOString(),
+    });
+  }
 }

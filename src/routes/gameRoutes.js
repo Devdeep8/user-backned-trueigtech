@@ -2,6 +2,8 @@ import express from "express";
 import gameController from "../controllers/game.controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import upload from "../middlewares/uploadConfig.js";
+import { validateRequest } from "../middlewares/guard.middleware.js";
+import { updateGameSchema } from "../validation/schema.validation/game.schema.js";
 
 const gameRoutes = express.Router();
 
@@ -35,6 +37,7 @@ gameRoutes.post(
   upload.single("file"),
   gameController.bulkUpload,
 );
+
 gameRoutes.get(
   "/showallgames",
   authMiddleware.authenticate,
@@ -59,6 +62,7 @@ gameRoutes.patch(
   authMiddleware.authorize({
     permissions: ["game.update"],
   }),
+  validateRequest(updateGameSchema , ),
   gameController.updateGame,
 );
 
