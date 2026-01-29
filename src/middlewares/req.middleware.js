@@ -2,6 +2,8 @@ const reqMiddleware = async (req, res, next) => {
   try {
     const METHODS_WITH_BODY = ["POST", "PUT", "PATCH", "DELETE"];
 
+    console.log(req.originalUrl)
+
     // Skip GET and others
     if (!METHODS_WITH_BODY.includes(req.method)) {
       return next();

@@ -13,6 +13,7 @@ import roleRoutes from "./routes/rolesRoutes.js";
 import permissionRoutes from "./routes/permissionroute.js";
 import { requestIdMiddleware } from "./middlewares/middleware.js";
 import reqMiddleware from "./middlewares/req.middleware.js";
+import responseMiddleware from "./middlewares/response.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 6001;
@@ -30,6 +31,7 @@ app.use(
 
 app.use(requestIdMiddleware);
 app.use(reqMiddleware)
+app.use(responseMiddleware)
 
 // Routes
 app.use("/api/auth", authRoutes);

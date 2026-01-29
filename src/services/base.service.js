@@ -21,6 +21,7 @@ export class BaseService {
   async execute() {
     try {
       const result = await this.run();
+      
       this.logSuccess();
       return this.buildSuccessResponse(result);
     } catch (error) {
@@ -49,7 +50,7 @@ export class BaseService {
   buildSuccessResponse(result) {
     return {
       success: true,
-      data: result,
+      data: result, // raw result from service
       meta: {
         service: this.serviceName,
         executionTime: `${Date.now() - this.startTime}ms`,
@@ -93,26 +94,23 @@ export class BaseService {
     res,
     result,
     successMessage = "Operation successful",
-    successCode = this.httpStatus.OK,
+    successCode = 200,
   ) {
-    // Handle error response
     if (!result.success) {
-      return res.status(result.error.statusCode).json({
+      return res.status(result.error?.statusCode || 500).json({
         success: false,
-        message: result.error.message,
-        code: result.error.code,
-        type: result.error.type,
-        meta: result.meta,
+        message: result.error?.message || "Something went wrong",
+        meta: result.meta || {},
       });
     }
 
-    // Handle success response
-    return res.status(successCode).json({
-      success: true,
+    // Merge message inside data instead of wrapping everything again
+    const response = {
+      ...this.buildSuccessResponse(result.data),
       message: successMessage,
-      data: result.data,
-      meta: result.meta,
-    });
+    };
+
+    return res.status(successCode).json(response);
   }
 
   /**

@@ -6,7 +6,6 @@ import AppError from "../utils/appError.js";
 import fs from "fs";
 import csvParser from "csv-parser";
 import DeleteService from "../services/game.services/softDelete.game.service.js";
-import { httpStatus } from "../helper/http-status.js";
 class GameController {
   async createGame(req, res, next) {
     try {
@@ -56,7 +55,6 @@ class GameController {
         res,
         result,
         "Game updated successfully",
-        httpStatus.OK,
       );
     } catch (error) {
       next(error);
@@ -171,19 +169,21 @@ class GameController {
 
       const context = {
         user: req.user, // from auth middleware
+        requestId : req.requestId
       };
 
       const getAllGamesService = new GetAllGamesService(
         { filter, search, pagination, dateRange },
         context,
       );
-      const result = await getAllGamesService.run();
+      const result = await getAllGamesService.execute();
 
-      return res.status(200).json({
-        success: true,
-        message: "Games retrieved successfully",
-        ...result,
-      });
+      return getAllGamesService.sendResponse(
+        res,
+        result,
+        "Games retrieved successfully",
+        200,
+      );
     } catch (error) {
       next(error);
     }

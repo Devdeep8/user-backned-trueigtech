@@ -75,17 +75,14 @@ class AuthController {
     setAccessTokenCookie(res, result.data.accessToken);
     setRefreshTokenCookie(res, result.data.refreshToken);
 
-    return res.status(200).json({
-      success: true,
-      message: "User logged in successfully",
-      data: {
-        user: result.data.user,
-        accessToken: result.data.accessToken,
-        refreshToken: result.data.refreshToken,
-      },
-      meta: result.meta,
-    });
+    return loginService.sendResponse(
+      res,
+      result,
+      "User logged in successfully",
+      200,
+    );
   }
+
   async refresh(req, res, next) {
     const refreshToken = req.cookies.refreshToken;
     const config = {

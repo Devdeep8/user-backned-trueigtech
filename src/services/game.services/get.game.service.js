@@ -98,7 +98,7 @@ class GetAllGamesService extends GenericGetService {
       const total = parseInt(countResult.total);
 
       return {
-        meta: {
+        page: {
           page,
           limit,
           total,
