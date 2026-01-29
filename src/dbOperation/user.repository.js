@@ -23,13 +23,16 @@ class UserRepository {
   async getUserByIdentifier(where) {
     return await this.User.findOne({
       where,
+      attributes: ["id", "name", "email", "isActive" , "refreshToken"], // only needed user fields
       include: [
         {
           model: Role,
+          attributes: ["name"], // only role name
           include: [
             {
               model: Permission,
-              through: { attributes: [] },
+              attributes: ["key"], // only permission key
+              through: { attributes: [] }, // remove join table attributes
             },
           ],
         },
@@ -65,7 +68,6 @@ class UserRepository {
     const user = await this.User.update(data, { where: { id } });
     return user;
   }
-
 
   async softDeleteUser(id) {
     return await this.User.update({ deletedAt: new Date() }, { where: { id } });

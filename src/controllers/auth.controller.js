@@ -133,10 +133,8 @@ class AuthController {
   async logout(req, res, next) {
     try {
       const logoutService = new LogoutService(
-        AppError,
         { userId: req.user.userId },
         { res },
-        db,
       );
       await logoutService.run();
       clearAuthCookies(res);
