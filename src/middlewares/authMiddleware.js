@@ -55,7 +55,7 @@ class AuthMiddleware {
         permissions: user.userRole.permissions?.map((p) => p.key) || [],
       };
       
-      console.log("middleware 1 run")
+      // console.log("middleware 1 run")
       return next();
     } catch (err) {
       return this.handleRefresh(req, res, next);
@@ -116,7 +116,7 @@ class AuthMiddleware {
         permissions: user.userRole.permissions?.map((p) => p.key) || [],
       };
 
-      console.log("middleware 2 run")
+      // console.log("middleware 2 run")
 
       return next();
     } catch (err) {
