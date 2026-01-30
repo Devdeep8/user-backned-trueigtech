@@ -2,11 +2,25 @@ const reqMiddleware = async (req, res, next) => {
   try {
     const METHODS_WITH_BODY = ["POST", "PUT", "PATCH", "DELETE"];
 
-    console.log(req.originalUrl)
+    console.log(req.originalUrl);
 
     // Skip GET and others
     if (!METHODS_WITH_BODY.includes(req.method)) {
       return next();
+    }
+
+    const contentType = req.headers["content-type"];
+    if (!contentType) {
+      return res.status(415).json({
+        message: "Content-Type header is required",
+      });
+    }
+
+    if (!contentType.includes("application/json")) {
+      return res.status(415).json({
+        message: "Only application/json is allowed",
+        received: contentType,
+      });
     }
 
     // ------------------------
