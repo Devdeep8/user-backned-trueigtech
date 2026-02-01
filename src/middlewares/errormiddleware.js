@@ -1,6 +1,4 @@
 const errorHandler = (err, req, res, next) => {
-  console.log("🌍 Global error middleware hit");
-
   const statusCode = err.statusCode || 500;
 
   if (process.env.NODE_ENV === "development") {

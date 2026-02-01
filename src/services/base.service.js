@@ -21,9 +21,10 @@ export class BaseService {
   async execute() {
     try {
       const result = await this.run();
-      this.logSuccess();
+      // this.logSuccess();
       return this.buildSuccessResponse(result);
     } catch (error) {
+      console.log(`🟡 4 → message [base.service.js:28]`, error);
       let appError =
         error instanceof AppError
           ? error
@@ -39,9 +40,9 @@ export class BaseService {
         appError.service = this.serviceName;
       }
 
-      this.logError(appError.message);
+      // this.logError(appError.message);
 
-      throw appError;
+      throw error;
     }
   }
 

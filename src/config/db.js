@@ -18,7 +18,6 @@ export const connectDB = async () => {
     await sequelize.authenticate();
     console.log("✅ PostgreSQL connected successfully.");
   } catch (error) {
-    console.error("❌ Unable to connect:", error);
-    throw new AppError("Database not authenticated", 502, { cause: error });
+    throw new AppError("Database not authenticated", 502, { type: error });
   }
 };

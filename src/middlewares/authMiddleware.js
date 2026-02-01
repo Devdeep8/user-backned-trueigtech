@@ -121,7 +121,7 @@ class AuthMiddleware {
       return next();
     } catch (err) {
       // 🔴 Return 401 for any JWT verification errors
-      return res.status(401).json({ message: "Authentication failed" });
+      next(err)
     }
   }
 

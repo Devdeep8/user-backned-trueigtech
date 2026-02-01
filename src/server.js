@@ -36,7 +36,7 @@ app.use(responseMiddleware)
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/game", gameRoutes);
-app.use("/api/user", userRouter);
+app.use("/api/user", userRouter); 
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
@@ -47,7 +47,7 @@ app.get("/health", async (req, res) => {
   console.log(JSON.stringify(req.headers["user-agent"]));
   try {
     // Example DB check
-    await connectDB(); // Sequelize / Prisma / knex ping
+    // await connectDB(); // Sequelize / Prisma / knex ping
     return res.status(200).json({
       status: "OK",
       uptime: process.uptime(),

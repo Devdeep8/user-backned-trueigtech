@@ -1,101 +1,42 @@
+// src/middlewares/reqMiddleware.js
+import { httpStatus } from "../helper/http-status.js";
+import db from "../model/db.js";
+import AppError from "../utils/appError.js";
 const reqMiddleware = async (req, res, next) => {
   try {
+    // ------------------------
+    // 0️⃣ DB / Internet Check
+    // ------------------------
+    try {
+      // Simple DB ping
+      await db.sequelize.authenticate();
+    } catch (err) {
+      throw new AppError("Database unreachable / Internet issue" , httpStatus.INTERNAL_SERVER_ERROR , {type: "internet"} , "req")
+    }
+
+    // ------------------------
+    // 1️⃣ Body & Content-Type checks (optional if needed)
+    // ------------------------
     const METHODS_WITH_BODY = ["POST", "PUT", "PATCH", "DELETE"];
-
-    console.log(req.originalUrl);
-
-    // Skip GET and others
-    if (!METHODS_WITH_BODY.includes(req.method)) {
-      return next();
+    if (METHODS_WITH_BODY.includes(req.method)) {
+      const contentType = req.headers["content-type"];
+      if (!contentType || !contentType.includes("application/json")) {
+        const error = new Error("Content-Type must be application/json");
+        error.status = 415;
+        throw error;
+      }
+ 
+      if (!req.body || Object.keys(req.body).length === 0) {
+        const error = new Error("Request body is required");
+        error.status = 400;
+        throw error;
+      }
     }
 
-    const contentType = req.headers["content-type"];
-    if (!contentType) {
-      return res.status(415).json({
-        message: "Content-Type header is required",
-      });
-    }
-
-    if (!contentType.includes("application/json")) {
-      return res.status(415).json({
-        message: "Only application/json is allowed",
-        received: contentType,
-      });
-    }
-
-    // ------------------------
-    // 1️⃣ Body existence check
-    // ------------------------
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({
-        message: "Request body is required",
-      });
-    }
-
-    // ------------------------
-    // 2️⃣ CSP (Content Security Policy)
-    // ------------------------
-    // console.log()
-    // res.setHeader(
-    //   "Content-Security-Policy",
-    //   "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';",
-    // );
-
-    // // ------------------------
-    // // 3️⃣ SQL Injection patterns
-    // // ------------------------
-    // const sqlInjectionRegex =
-    //   /(\b(select|insert|update|delete|drop|truncate|alter)\b)|(--|;|'|"|\/\*|\*\/|\bOR\b|\bAND\b)/gi;
-
-    // // ------------------------
-    // // 4️⃣ XSS patterns
-    // // ------------------------
-    // const xssRegex =
-    //   /(<script.*?>.*?<\/script>)|(<.*?on\w+=.*?>)|javascript:/gi;
-
-    // // ------------------------
-    // // 5️⃣ Deep scan body values
-    // // ------------------------
-    // const scanObject = (obj) => {
-    //   for (const key in obj) {
-    //     const value = obj[key];
-    //     console.log(value, "first");
-
-    //     if (typeof value === "string") {
-    //       if (sqlInjectionRegex.test(value)) {
-    //         throw {
-    //           status: 400,
-    //           message: "Potential SQL Injection detected",
-    //           field: key,
-    //         };
-    //       }
-
-    //       if (xssRegex.test(value)) {
-    //         throw {
-    //           status: 400,
-    //           message: "Potential XSS attack detected",
-    //           field: key,
-    //         };
-    //       }
-    //     }
-
-    //     if (typeof value === "object" && value !== null) {
-    //       console.log(value, "recursion check");
-
-    //       scanObject(value); // recursive check
-    //     }
-    //   }
-    // };
-
-    // scanObject(req.body);
-
-    // ✅ Passed all checks
+    // ✅ DB is healthy, body is okay → continue
     next();
   } catch (err) {
-    return res.status(err.status || 500).json({
-      message: err.message || "Security validation failed",
-      field: err.field || null,
-    });
+    next(err); // central error handler will send the response
   }
 };
 

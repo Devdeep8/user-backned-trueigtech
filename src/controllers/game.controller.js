@@ -52,7 +52,7 @@ class GameController {
       const result = await updateGameService.execute();
 
       // ✅ One line - BaseService handles everything!
-      return res.status(httpStatus.OK).json(result)
+      return res.status(httpStatus.OK).json(result);
     } catch (error) {
       next(error);
     }
@@ -164,7 +164,7 @@ class GameController {
 
       const context = {
         user: req.user, // from auth middleware
-        requestId : req.requestId
+        requestId: req.requestId,
       };
 
       const getAllGamesService = new GetAllGamesService(
@@ -173,10 +173,10 @@ class GameController {
       );
       const result = await getAllGamesService.execute();
 
-      return res.status(200).json(result)
+      return res.status(200).json(result);
     } catch (error) {
-      console.log(error)
-      next(error)
+      console.log(error);
+      next(error);
     }
   }
 }
