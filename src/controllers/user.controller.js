@@ -5,7 +5,6 @@ import AppError from "../utils/appError.js";
 class UserController {
   async createUser(req , res ,next) {
     const {data} = req.body;   
-    console.log("Debug data",data)
     try {
       const user = await userService.createUser(data);
       if (!user){ 

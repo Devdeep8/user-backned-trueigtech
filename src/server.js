@@ -40,7 +40,7 @@ app.use("/api/user", userRouter);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
-// app.use(errorHandler);
+app.use(errorHandler);
 
 app.get("/health", async (req, res) => {
   console.log("health check");

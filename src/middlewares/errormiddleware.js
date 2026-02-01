@@ -1,36 +1,26 @@
-// middlewares/errorHandler.js
-
 const errorHandler = (err, req, res, next) => {
+  console.log("🌍 Global error middleware hit");
+
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Something went wrong';
 
-  // Log error
-  if (process.env.NODE_ENV === 'development') {
-    console.error('❌ Error:', err.name);
-    console.error('Message:', message);
-    console.error('Stack:', err.stack);
+  if (process.env.NODE_ENV === "development") {
+    console.error("❌ Error:", err.name);
+    console.error("Message:", err.message);
+    console.error("Stack:", err.stack);
   }
 
-  // Handle specific error types
-  if (err.name?.includes('Sequelize')) {
-    return res.status(500).json({
-      success: false,
-      message: 'Database operation failed',
-    });
-  }
-
-  if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired token',
-    });
-  }
-
-  // Send error response
-  res.status(statusCode).json({
-    success: false,
-    message: message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  return res.status(statusCode).json({
+    error: {
+      message: err.message || "Something went wrong",
+      code: err.code || "INTERNAL_ERROR",
+      type: err.type || "SERVER_ERROR",
+      statusCode: statusCode,
+    },
+    meta: {
+      service: err.service || "UnknownService",
+      requestId: req.requestId,
+      timestamp: new Date().toISOString(),
+    },
   });
 };
 

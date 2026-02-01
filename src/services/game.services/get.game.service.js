@@ -93,9 +93,10 @@ class GetAllGamesService extends GenericGetService {
       const games = await this.db.sequelize.query(dataQuery, {
         replacements,
         type: QueryTypes.SELECT,
-      });
+      })
 
       const total = parseInt(countResult.total);
+      if (games) throw new this.error("Games are their" , this.httpStatus.BAD_REQUEST)
 
       return {
         page: {

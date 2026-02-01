@@ -1,7 +1,7 @@
 // utils/AppError.js
 
 class AppError extends Error {
-  constructor(message, statusCode = 500, options = {}) {
+  constructor(message, statusCode = 500, options = {} , service) {
     super(message);
 
     // HTTP status code
@@ -10,6 +10,7 @@ class AppError extends Error {
     
     // Operational vs Programmer error
     this.isOperational = true;
+    this.service = service; // 👈 service name lives here
     
     // Error code (for API consumers)
     this.code = options.code || this.generateCode(statusCode);

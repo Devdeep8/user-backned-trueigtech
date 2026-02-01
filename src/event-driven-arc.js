@@ -1,24 +1,17 @@
-
-
-const user = { name: "Devdeep", balance: 1000 };
+const user = { balance: 1000 };
 
 const secureUser = new Proxy(user, {
-    // Intercept 'get' (reading)
-    get(target, prop) {
-        console.log(`Property ${prop} was accessed.`);
-        return target[prop];
-    },
-    // Intercept 'set' (writing)
-    set(target, prop, value) {
+    set(target, prop, value, receiver) {
+        console.log("Data")
         if (prop === "balance" && value < 0) {
-            throw new Error("Balance cannot be negative!");
+            console.error("Negative balance blocked!");
+            return false; // Signifies assignment failure
         }
-        console.log(`this is the new balance: ${value}`)
-        target[prop] = value;
-        return true;
+        
+        // Reflect.set returns true if it worked, false if not
+        return Reflect.set(target, prop, value, receiver);
     }
-}); 
+});
+secureUser.balance = -1
 
-// secureUser.balance = 500; // Works
-console.log(secureUser.balance = 100)
-
+console.log(secureUser)

@@ -6,6 +6,7 @@ import AppError from "../utils/appError.js";
 import fs from "fs";
 import csvParser from "csv-parser";
 import DeleteService from "../services/game.services/softDelete.game.service.js";
+import { httpStatus } from "../helper/http-status.js";
 class GameController {
   async createGame(req, res, next) {
     try {
@@ -51,11 +52,7 @@ class GameController {
       const result = await updateGameService.execute();
 
       // ✅ One line - BaseService handles everything!
-      return updateGameService.sendResponse(
-        res,
-        result,
-        "Game updated successfully",
-      );
+      return res.status(httpStatus.OK).json(result)
     } catch (error) {
       next(error);
     }
@@ -63,7 +60,6 @@ class GameController {
   async bulkUpdate(req, res, next) {
     try {
       const { gameIds, isActive } = req.body;
-      console.log(gameIds, isActive, "debug");
 
       if (!gameIds) {
         throw new AppError("Games or isActive is missing", 400);
@@ -130,7 +126,6 @@ class GameController {
 
       const service = new BulkCreateGameService({ games }, { user: req.user });
       const { successful, failed } = await service.run();
-      console.log(successful, failed, "debug");
 
       return res.status(200).json({
         success: true,
@@ -154,7 +149,7 @@ class GameController {
   async showAllGames(req, res, next) {
     try {
       const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
+      const limit = 1 || 10;
       const genre = req.query.genre || null;
       const search = req.query.search || null;
       const status = req.query.status || null;
@@ -178,14 +173,10 @@ class GameController {
       );
       const result = await getAllGamesService.execute();
 
-      return getAllGamesService.sendResponse(
-        res,
-        result,
-        "Games retrieved successfully",
-        200,
-      );
+      return res.status(200).json(result)
     } catch (error) {
-      next(error);
+      console.log(error)
+      next(error)
     }
   }
 }

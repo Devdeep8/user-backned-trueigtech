@@ -1,25 +1,23 @@
 const responseMiddleware = (req, res, next) => {
-  const originalJson = res.json;
+  const originalJson = res.json.bind(res);
 
-  res.json = function (data) {
-    // Check if the service returned extra info
-    const meta = data?.meta || {};
-    const serviceName = meta.service || req.serviceName || "UnknownService";
-    const executionTime = meta.executionTime || null;
+  res.json = function (payload = {}) {
+    const isError = Boolean(payload?.error);
+
+    if (isError) {
+      const statusCode = payload.error.statusCode || 500;
+      res.status(statusCode);
+    }
 
     const responseBody = {
-      success: true,
-      requestId: req.requestId || null,
-      timestamp: new Date().toISOString(),
-      data: data.data || data, // support raw data or {data, meta}
-      meta: {
-        service: serviceName,
-        executionTime,
-      },
+      success: !isError,
+      ...(isError
+        ? { error: payload.error }
+        : { data: payload.data ?? payload }),
+      ...(payload.meta ? { meta: payload.meta } : {}),
     };
 
-
-    return originalJson.call(this, responseBody);
+    return originalJson(responseBody);
   };
 
   next();

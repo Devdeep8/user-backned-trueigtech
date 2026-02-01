@@ -1,6 +1,5 @@
 import LoginService from "../services/auth.services/login.service.js";
-import AppError from "../utils/appError.js";
-import db from "../model/db.js";
+
 import {
   clearAuthCookies,
   setAccessTokenCookie,
@@ -61,26 +60,11 @@ class AuthController {
 
     const result = await loginService.execute();
 
-    // Handle error response
-    if (!result.success) {
-      return res.status(result.error.statusCode).json({
-        success: false,
-        message: result.error.message,
-        code: result.error.code,
-        meta: result.meta,
-      });
-    }
-
     // Handle success response
     setAccessTokenCookie(res, result.data.accessToken);
     setRefreshTokenCookie(res, result.data.refreshToken);
+    return res.status(200).json({...result})
 
-    return loginService.sendResponse(
-      res,
-      result,
-      "User logged in successfully",
-      200,
-    );
   }
 
   async refresh(req, res, next) {

@@ -21,23 +21,27 @@ export class BaseService {
   async execute() {
     try {
       const result = await this.run();
-      
       this.logSuccess();
       return this.buildSuccessResponse(result);
     } catch (error) {
-      const validationError =
+      let appError =
         error instanceof AppError
           ? error
           : new AppError(
               "Internal server error",
-              httpStatus.INTERNAL_SERVER_ERROR,
-              "SERVER_ERROR",
+              this.httpStatus.INTERNAL_SERVER_ERROR,
+              { code: "SERVER_ERROR", type: "SERVER_ERROR" },
+              this.serviceName,
             );
-      // Log the error for debugging
-      this.logError(validationError.message);
 
-      // Return standardized error format instead of throwing
-      return this.buildErrorResponse(validationError);
+      // ✅ attach service name if missing
+      if (!appError.service) {
+        appError.service = this.serviceName;
+      }
+
+      this.logError(appError.message);
+
+      throw appError;
     }
   }
 
@@ -49,34 +53,7 @@ export class BaseService {
    */
   buildSuccessResponse(result) {
     return {
-      success: true,
       data: result, // raw result from service
-      meta: {
-        service: this.serviceName,
-        executionTime: `${Date.now() - this.startTime}ms`,
-        requestId: this.context?.requestId,
-        timestamp: new Date().toISOString(),
-      },
-    };
-  }
-
-  /**
-   * Build standardized error response with proper error codes
-   */
-  buildErrorResponse(error) {
-    const statusCode =
-      error.statusCode || this.httpStatus.INTERNAL_SERVER_ERROR;
-    const errorCode = getErrorCode(statusCode);
-    const errorType = getErrorType(statusCode);
-
-    return {
-      success: false,
-      error: {
-        message: error.message || "Something went wrong",
-        code: errorCode,
-        statusCode: statusCode,
-        type: errorType,
-      },
       meta: {
         service: this.serviceName,
         executionTime: `${Date.now() - this.startTime}ms`,
@@ -90,27 +67,8 @@ export class BaseService {
    * Send response to client
    * Handles both success and error responses in one method
    */
-  sendResponse(
-    res,
-    result,
-    successMessage = "Operation successful",
-    successCode = 200,
-  ) {
-    if (!result.success) {
-      return res.status(result.error?.statusCode || 500).json({
-        success: false,
-        message: result.error?.message || "Something went wrong",
-        meta: result.meta || {},
-      });
-    }
-
-    // Merge message inside data instead of wrapping everything again
-    const response = {
-      ...this.buildSuccessResponse(result.data),
-      message: successMessage,
-    };
-
-    return res.status(successCode).json(response);
+  sendResponse(res, result, successCode = this.httpStatus.OK) {
+    return res.status(successCode).json(result);
   }
 
   /**
