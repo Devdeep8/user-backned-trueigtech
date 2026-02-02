@@ -1,5 +1,6 @@
 // schemas/game.schema.js
 
+
 /**
  * Schema for updating a game
  */
@@ -33,11 +34,10 @@ export const updateGameSchema = {
             maxLength: "Description cannot exceed 1000 characters"
           }
         },
-        genre: {
+        categoryId: {
           type: "string",
-          enum: ["RPG", "Action", "Adventure", "Sports", "Strategy", "Simulation", "Puzzle", "Horror", "Racing", "Fighting"],
           errorMessage: {
-            type: "Genre must be a string",
+            type: "category must be a id",
             enum: "Genre must be one of: RPG, Action, Adventure, Sports, Strategy, Simulation, Puzzle, Horror, Racing, Fighting"
           }
         },

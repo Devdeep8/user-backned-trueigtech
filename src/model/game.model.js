@@ -46,6 +46,7 @@ export const Game = sequelize.define(
       defaultValue: 0.0,
       comment: "Average rating of the game (0.00 to 5.00)",
     },
+    categoryId: { type: DataTypes.UUID, allowNull: true }, // new column
   },
   {
     // Enable paranoid mode for automatic soft delete handling

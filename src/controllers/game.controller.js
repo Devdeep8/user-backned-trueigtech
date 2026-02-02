@@ -23,13 +23,13 @@ class GameController {
       },
     );
     const result = await deleteService.execute();
-    return res.status(204).json(result)
-
+    return res.status(204).json(result);
   }
   async updateGame(req, res, next) {
     try {
       const { id } = req.params;
       const data = req.body;
+      console.log(`🟡 data → message [game.controller.js:32]`, data);
 
       const updateGameService = new UpdateGameService(
         { data, id },
@@ -39,7 +39,7 @@ class GameController {
       const result = await updateGameService.execute();
 
       // ✅ One line - BaseService handles everything!
-      return res.status(httpStatus.OK).json(result)
+      return res.status(httpStatus.OK).json(result);
     } catch (error) {
       next(error);
     }
@@ -136,44 +136,58 @@ class GameController {
   async showAllGames(req, res, next) {
     try {
       const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
-      const genre = req.query.genre || null;
+      const limit = Number(req.query.limit) || 20;
       const search = req.query.search || null;
-      const status = req.query.status || null;
       const sortBy = req.query.sortBy || null;
       const sortOrder = req.query.sortOrder || null;
 
-      
       const pagination = { page, limit };
+
+      // Date range handling
       const dateFrom = req.query.dateFrom || null;
-      const dateTo = req.query.dateTo || null
+      const dateTo = req.query.dateTo || null;
       let dateRange;
-      if (dateFrom && dateTo){
-         dateRange = {dateFrom , dateTo}
+      if (dateFrom && dateTo) {
+        dateRange = { dateFrom, dateTo };
       }
 
+      // Build filter object from query params
       const filter = {};
-      if (status) filter.isActive = status === "active" ? true : false;
-      if (genre) filter.genre = genre;
 
-      const sort = {}
-      if (sortBy) sort.by = sortBy
-      if (sortOrder) sort.order = sortOrder
+      // Category filter (using categoryId from query)
+      if (req.query.categoryId) {
+        filter.categoryId = req.query.categoryId;
+      }
+
+      // Status filter (active/inactive)
+      if (req.query.status && req.query.status !== "all") {
+        if (req.query.status === "active") {
+          filter.isActive = true;
+        } else if (req.query.status === "inactive") {
+          filter.isActive = false;
+        }
+      }
+
+      // Sort object
+      const sort = {};
+      if (sortBy) sort.by = sortBy;
+      if (sortOrder) sort.order = sortOrder;
+
       const context = {
         user: req.user, // from auth middleware
-        requestId : req.requestId
+        requestId: req.requestId,
       };
 
       const getAllGamesService = new GetAllGamesService(
-        { filter, search, sort,pagination, dateRange },
+        { filter, search, sort, pagination, dateRange },
         context,
       );
       const result = await getAllGamesService.execute();
 
-      return res.status(200).json(result)
+      return res.status(200).json(result);
     } catch (error) {
-      (error)
-      next(error)
+      error;
+      next(error);
     }
   }
 }

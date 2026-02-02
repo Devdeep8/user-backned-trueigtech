@@ -6,7 +6,7 @@ import { Role } from "./role.model.js";
 import { Permission } from "./permission.model.js";
 import { Game } from "./game.model.js";
 import { RolePermission } from "./rolepermissions.model.js";
-
+import { Category } from "./categories.model.js";
 export const associateModels = () => {
   // User ↔ Role (Many Users belong to One Role)
   User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
@@ -26,6 +26,10 @@ export const associateModels = () => {
     foreignKey: "permissionId",
     otherKey: "roleId",
   });
+
+  
+  Game.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
+  Category.hasMany(Game, { foreignKey: "categoryId", as: "games" });
 };
 export const db = {
   sequelize,
@@ -34,4 +38,5 @@ export const db = {
   permission: Permission,
   game: Game,
   rolePermission: RolePermission,
+  category: Category,
 };

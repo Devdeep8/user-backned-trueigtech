@@ -3,10 +3,9 @@ import { GenericGetService } from "../../RESTapi/genericGetAPi.js";
 class GetAllGamesService extends GenericGetService {
   async run() {
     const backendFilters = {};
-    const { where, order ,limit, offset, page } =
+    console.log("this.args :>> ", this.args);
+    const { where, order, limit, offset, page } =
       await this.buildQuery(backendFilters);
-
-   
 
     // 🔒 Enforce system constraints (never trust client fully)
     const ormWhere = {
@@ -14,26 +13,28 @@ class GetAllGamesService extends GenericGetService {
       deletedAt: null, // override always
     };
 
-    const { count, rows: games } =
-      await this.db.game.findAndCountAll({
-        where: ormWhere,
-        limit,
-        offset,
-        order: order,
-        attributes: [
-          "id",
-          "name",
-          "description",
-          "genre",
-          "imageUrl",
-          "gameUrl",
-          "rating",
-          "isActive",
-          "createdAt",
-          "updatedAt",
-          "deletedAt",
-        ],
-      });
+    const { count, rows: games } = await this.db.game.findAndCountAll({
+      where: ormWhere,
+      limit,
+      offset,
+      order: order,
+      attributes: [
+        "id",
+        "name",
+        "description",
+        "imageUrl",
+        "gameUrl",
+        "rating",
+        "isActive",
+      ],
+      include: [
+        {
+          model: this.db.category,
+          as: "category",
+          attributes: ["id", "name"], // ✅ frontend gets category name also
+        },
+      ],
+    });
 
     return {
       page: {

@@ -3,6 +3,7 @@ import { BaseService } from "../base.service.js";
 class UpdateGameService extends BaseService {
   async run() {
     const { data, id } = this.args;
+    console.log('data :>> ', data);
     if (!id || !data) {
       throw new this.error(
         "Game ID or data is missing",

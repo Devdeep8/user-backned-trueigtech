@@ -14,6 +14,7 @@ import permissionRoutes from "./routes/permissionroute.js";
 import { requestIdMiddleware } from "./middlewares/middleware.js";
 import reqMiddleware from "./middlewares/req.middleware.js";
 import responseMiddleware from "./middlewares/response.middleware.js";
+import  categoriesRoutes  from "./routes/categoriesRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 6001;
@@ -40,6 +41,7 @@ app.use("/api/user", userRouter);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
+app.use("/api/categories" , categoriesRoutes)
 app.use(errorHandler);
 
 app.get("/health", async (req, res) => {

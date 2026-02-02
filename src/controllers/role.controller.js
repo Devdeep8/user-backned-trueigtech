@@ -96,11 +96,7 @@ class RoleController {
         { user: req.user, requestId: req.requestId },
       );
       const result = await service.execute();
-      return service.sendResponse(
-        res,
-        result,
-        "Role permission deleted successfully",
-      );
+      return res.status(httpStatus.OK).json(result)
     } catch (error) {
       next(error);
     }

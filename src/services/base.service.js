@@ -1,7 +1,5 @@
 // base.service.js
 import {
-  getErrorCode,
-  getErrorType,
   httpStatus,
 } from "../helper/http-status.js";
 import { db } from "../model/index.js";

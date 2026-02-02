@@ -17,7 +17,7 @@ const reqMiddleware = async (req, res, next) => {
     // ------------------------
     // 1️⃣ Body & Content-Type checks (optional if needed)
     // ------------------------
-    const METHODS_WITH_BODY = ["POST", "PUT", "PATCH", "DELETE"];
+    const METHODS_WITH_BODY = ["POST", "PUT", "PATCH",];
     if (METHODS_WITH_BODY.includes(req.method)) {
       const contentType = req.headers["content-type"];
       if (!contentType || !contentType.includes("application/json")) {
