@@ -14,5 +14,6 @@ export const Permission = sequelize.define("Permission", {
   description: DataTypes.STRING,
 }, {
   tableName: "permissions",
+  paranoid: false,
 });
 

@@ -4,9 +4,8 @@ import {
   getErrorType,
   httpStatus,
 } from "../helper/http-status.js";
-import db from "../model/db.js";
+import { db } from "../model/index.js";
 import AppError from "../utils/appError.js";
-
 export class BaseService {
   constructor(args = {}, context = {}) {
     this.error = AppError;

@@ -20,6 +20,7 @@ export const RolePermission = sequelize.define(
   },
   {
     tableName: "RolePermissions", // MUST MATCH
+    paranoid: false,
     timestamps: true,
   }
 );

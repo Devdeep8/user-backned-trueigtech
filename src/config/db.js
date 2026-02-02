@@ -9,15 +9,30 @@ dotenv.config();
 export const sequelize = new Sequelize({
   dialect: PostgresDialect,
   url: process.env.DATABASE_URL,
+
   logging: process.env.DB_LOGGING === "true" ? console.log : false,
+
+  pool: {
+    max: 10,        // max DB connections
+    min: 2,         // keep some warm connections
+    acquire: 30000, // wait time before throwing error
+    idle: 10000,    // close idle connections
+  },
+
+  define: {
+    paranoid: true,      // soft delete by default
+    timestamps: true,   // createdAt, updatedAt
+    underscored: false, // camelCase columns
+  },
 });
 
-// Test connection
+// Connect only ONCE on app boot
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ PostgreSQL connected successfully.");
+    console.log("✅ PostgreSQL connected with pool.");
   } catch (error) {
-    throw new AppError("Database not authenticated", 502, { type: error });
+    console.error("❌ DB connection failed:", error);
+    throw new AppError("Database not authenticated", 502, { cause: error });
   }
 };

@@ -23,26 +23,14 @@ class GameController {
       },
     );
     const result = await deleteService.execute();
-    if (!result.success) {
-      return res.status(result.error.statusCode).json({
-        success: false,
-        message: result.error.message,
-        code: result.error.code,
-        meta: result.meta,
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      message: "Game deleted successfully",
-      data: {
-        game: result,
-      },
-    });
+    return res.status(204).json(result)
+
   }
   async updateGame(req, res, next) {
     try {
       const { id } = req.params;
       const data = req.body;
+
 
       const updateGameService = new UpdateGameService(
         { data, id },
@@ -52,7 +40,7 @@ class GameController {
       const result = await updateGameService.execute();
 
       // ✅ One line - BaseService handles everything!
-      return res.status(httpStatus.OK).json(result);
+      return res.status(httpStatus.OK).json(result)
     } catch (error) {
       next(error);
     }
@@ -149,34 +137,44 @@ class GameController {
   async showAllGames(req, res, next) {
     try {
       const page = Number(req.query.page) || 1;
-      const limit = 1 || 10;
+      const limit = Number(req.query.limit) || 10;
       const genre = req.query.genre || null;
       const search = req.query.search || null;
       const status = req.query.status || null;
-      const sortBy = req.query.sortBy || "";
-      const sortOrder = req.query.sortOrder || "";
+      const sortBy = req.query.sortBy || null;
+      const sortOrder = req.query.sortOrder || null;
 
+      
       const pagination = { page, limit };
-      const dateRange = req.query.dateRange || "";
+      const dateFrom = req.query.dateFrom || null;
+      const dateTo = req.query.dateTo || null
+      let dateRange;
+      if (dateFrom && dateTo){
+         dateRange = {dateFrom , dateTo}
+      }
+
       const filter = {};
       if (status) filter.isActive = status === "active" ? true : false;
       if (genre) filter.genre = genre;
 
+      const sort = {}
+      if (sortBy) sort.by = sortBy
+      if (sortOrder) sort.order = sortOrder
       const context = {
         user: req.user, // from auth middleware
-        requestId: req.requestId,
+        requestId : req.requestId
       };
 
       const getAllGamesService = new GetAllGamesService(
-        { filter, search, pagination, dateRange },
+        { filter, search, sort,pagination, dateRange },
         context,
       );
       const result = await getAllGamesService.execute();
 
-      return res.status(200).json(result);
+      return res.status(200).json(result)
     } catch (error) {
-      console.log(error);
-      next(error);
+      console.log(error)
+      next(error)
     }
   }
 }

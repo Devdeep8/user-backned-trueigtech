@@ -1,6 +1,6 @@
 // src/middlewares/reqMiddleware.js
 import { httpStatus } from "../helper/http-status.js";
-import db from "../model/db.js";
+import { db } from "../model/index.js";
 import AppError from "../utils/appError.js";
 const reqMiddleware = async (req, res, next) => {
   try {
@@ -21,14 +21,13 @@ const reqMiddleware = async (req, res, next) => {
     if (METHODS_WITH_BODY.includes(req.method)) {
       const contentType = req.headers["content-type"];
       if (!contentType || !contentType.includes("application/json")) {
-        const error = new Error("Content-Type must be application/json");
-        error.status = 415;
+        const error = new AppError("Content-Type must be application/json" , httpStatus.CONTENT_TYPE);
+   
         throw error;
       }
  
       if (!req.body || Object.keys(req.body).length === 0) {
-        const error = new Error("Request body is required");
-        error.status = 400;
+        const error = new AppError("Request body is required" , httpStatus.BAD_REQUEST);
         throw error;
       }
     }

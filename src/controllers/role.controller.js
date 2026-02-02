@@ -14,11 +14,7 @@ class RoleController {
         { user: req.user, requestId: req.requestId },
       );
       const result = await getRoleService.execute();
-      return getRoleService.sendResponse(
-        res,
-        result,
-        "Roles retrieved successfully",
-      );
+      return res.status(httpStatus.OK).json(result)
     } catch (error) {
       next(error);
     }
@@ -66,11 +62,7 @@ class RoleController {
         { user: req.user, requestId: req.requestId },
       );
       const result = await service.execute();
-      return service.sendResponse(
-        res,
-        result,
-        "Roles with permissions retrieved successfully",
-      );
+      return res.status(httpStatus.OK).json(result)
     } catch (error) {
       next(error);
     }

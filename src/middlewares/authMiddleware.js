@@ -3,6 +3,7 @@ import AppError from "../utils/appError.js";
 import userRepository from "../dbOperation/user.repository.js";
 import { TokenService } from "../utils/token.service.js";
 import { setAccessTokenCookie } from "../utils/cookie.js";
+import { httpStatus } from "../helper/http-status.js";
 
 const tokenService = new TokenService({
   ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
@@ -97,7 +98,7 @@ class AuthMiddleware {
 
       if (user.refreshToken !== refreshToken) {
         // 🔴 Return 401 for token mismatch
-        return res.status(401).json({ message: "Invalid refresh token" });
+        throw new AppError("Refresh does not match with Db" , httpStatus.UNAUTHORIZED , {type: "login in another browser"} , "authmiddleware")
       }
 
       // Rotate access token

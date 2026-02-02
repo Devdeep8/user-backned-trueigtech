@@ -25,20 +25,19 @@ export class GenericGetService extends BaseService {
 
     // Date range filter
     if (dateRange) {
-      where.createdAt = { [Op.between]: [dateRange.from, dateRange.to] };
+      where.createdAt = { [Op.between]: [dateRange.dateFrom, dateRange.dateTo] };
     }
 
-    // // Sorting
-    // const order = sort
-    //   ? [[Object.keys(sort)[0], Object.values(sort)[0]]]
-    //   : [["createdAt", "DESC"]];
+    console.log(`🟡 date → daterange [genericGetAPi.js:32]`, dateRange);
+
+    const order = [[sort.by, sort.order]];
 
     // Pagination
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 10;
     const offset = (page - 1) * limit;
 
-    return { where, page, limit, offset };
+    return { where, order, page, limit, offset };
   }
   async buildSqlWhere(where) {
     const conditions = [];
@@ -142,5 +141,68 @@ export class GenericGetService extends BaseService {
       },
       data,
     };
+  }
+
+  static buildSelectQuery({
+    table,
+    where = {},
+    columns = ["*"],
+    order = [["createdAt", "DESC"]],
+    limit = 10,
+    offset = 0,
+  }) {
+    const conditions = [];
+    const replacements = {};
+
+    Object.entries(where).forEach(([key, value]) => {
+      if (value === null) {
+        conditions.push(`"${key}" IS NULL`);
+        return;
+      }
+
+      if (typeof value === "object") {
+        if (value[Op.iLike]) {
+          conditions.push(`"${key}" ILIKE :${key}`);
+          replacements[key] = value[Op.iLike];
+          return;
+        }
+        if (value[Op.between]) {
+          conditions.push(`"${key}" BETWEEN :${key}From AND :${key}To`);
+          replacements[`${key}From`] = value[Op.between][0];
+          replacements[`${key}To`] = value[Op.between][1];
+          return;
+        }
+      }
+
+      // Normal equality
+      conditions.push(`"${key}" = :${key}`);
+      replacements[key] = value;
+    });
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const selectColumns =
+      columns[0] === "*"
+        ? "*"
+        : columns.map((c) => `"${c}"`).join(", ");
+
+    const orderClause = order
+      .map(([col, dir]) => `"${col}" ${dir.toUpperCase()}`)
+      .join(", ");
+
+    const query = `
+      SELECT ${selectColumns}
+      FROM "${table}"
+      ${whereClause}
+      ORDER BY ${orderClause}
+      LIMIT :limit OFFSET :offset;
+    `;
+
+    replacements.limit = limit;
+    replacements.offset = offset;
+
+    return { query, replacements };
   }
 }
