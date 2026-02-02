@@ -8,7 +8,7 @@
  */
 export const buildResourceFilter = (user, resource) => {
   const whereCondition = { deletedAt: null };
-//   console.log(user);
+//   (user);
   if (!user || !user.permissions) {
     // No user or no permissions → show only active, non-deleted items
     whereCondition.isActive = true;
@@ -38,6 +38,6 @@ export const buildResourceFilter = (user, resource) => {
 
   // Default: no permissions → show only active games
   whereCondition.isActive = true;
-  console.log(whereCondition);
+  (whereCondition);
   return whereCondition;
 };

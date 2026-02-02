@@ -29,7 +29,7 @@ class GameService {
 
     const result = await this.gameDbops.updateGameById(id, data);
 
-    console.log(result);
+    (result);
     if (!result) throw new AppError("Game not found", 404);
 
     return await Games.findByPk(id);

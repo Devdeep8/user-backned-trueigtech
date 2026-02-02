@@ -31,7 +31,6 @@ class GameController {
       const { id } = req.params;
       const data = req.body;
 
-
       const updateGameService = new UpdateGameService(
         { data, id },
         { user: req.user, requestId: req.requestId },
@@ -173,7 +172,7 @@ class GameController {
 
       return res.status(200).json(result)
     } catch (error) {
-      console.log(error)
+      (error)
       next(error)
     }
   }

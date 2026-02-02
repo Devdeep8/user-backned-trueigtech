@@ -12,8 +12,8 @@ class RefreshService extends BaseService {
                 where: { refreshToken : token },
                 include: [
                     {
-                        model: this.db.userRole,
-                        as: "userRole",
+                        model: this.db.role,
+                        as: "role",
                         attributes: ["name"],
                     },
                 ],
@@ -31,7 +31,7 @@ class RefreshService extends BaseService {
             const tokenService = new TokenService(config);
             const payload = {
                 userId: user.id,
-                role: user.userRole.name,
+                role: user.role.name,
             };
             
             const accessToken = tokenService.createAccessToken(payload);

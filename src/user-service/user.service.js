@@ -8,12 +8,12 @@ class UserService extends EventEmitter {
     super();
     // Internal Listener (Example: Log every user created internally)
     this.on("userCreatedInternal", (user) => {
-      console.log(
+      (
         `🔕 [Service Internal Log]: User ${user.name} validated locally.`
       );
     });
     this.on("userDeletion", (deletedUser) => {
-      console.log(
+      (
         `🔕 [Service Internal Log]: User ${deletedUser.id} validated locally.`
       );
     });
@@ -34,7 +34,7 @@ class UserService extends EventEmitter {
       ...userData,
     };
 
-    console.log(`🏭 [Service] Processing User: ${user.name}`);
+    (`🏭 [Service] Processing User: ${user.name}`);
 
     // 2. Emit Internal Event (Internal State Change)
     this.emit("userCreatedInternal", user);

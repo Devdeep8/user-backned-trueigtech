@@ -6,7 +6,7 @@ class BulkCreateGameService extends BaseService {
     const { user } = this.context;
 
     if (!games || !games.length) throw this.error("No games provided", 400);
-    console.log(games, "debug");
+    (games, "debug");
     
     const successful = [];
     const failed = [];

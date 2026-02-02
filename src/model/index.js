@@ -1,41 +1,37 @@
 // src/models/index.js
+import { sequelize } from "../config/database.js";
+
 import { User } from "./user.model.js";
 import { Role } from "./role.model.js";
 import { Permission } from "./permission.model.js";
-import {Games} from "./game.model.js"
-import {sequelize} from "../config/db.js";
-// Define associations in a separate function
-export const associateModels = () => {
-  User.belongsTo(Role, {
-    foreignKey: "roleId",
-    as: "userRole",
-    inverse: { type: "hasMany", as: "users" },
-  });
-  Role.hasMany(User, {
-    foreignKey: "roleId",
-    as: "users",
-    inverse: { type: "belongsTo", as: "userRole" },
-  });
+import { Game } from "./game.model.js";
+import { RolePermission } from "./rolepermissions.model.js";
 
+export const associateModels = () => {
+  // User ↔ Role (Many Users belong to One Role)
+  User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
+  Role.hasMany(User, { foreignKey: "roleId", as: "users" });
+
+  // Role ↔ Permission (Many-to-Many) ✅ FIXED
   Role.belongsToMany(Permission, {
-    through: "RolePermissions",
+    through: RolePermission,
     as: "permissions",
     foreignKey: "roleId",
-    inverse: {
-      as: "roles",
-      foreignKey: "permissionId",
-    },
+    otherKey: "permissionId",
+  });
+
+  Permission.belongsToMany(Role, {
+    through: RolePermission,
+    as: "roles",
+    foreignKey: "permissionId",
+    otherKey: "roleId",
   });
 };
-
-// Create a single db object
-const db = {
+export const db = {
+  sequelize,
   user: User,
-  game: Games,
   role: Role,
   permission: Permission,
-  sequelize: sequelize, 
+  game: Game,
+  rolePermission: RolePermission,
 };
-
-
-export { User, Role, Permission , db };

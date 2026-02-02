@@ -82,11 +82,11 @@ export class ErrorLogger {
     };
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('\n✅ SUCCESS:', logEntry.message);
-      console.log(`   Service: ${logEntry.service}`);
-      console.log(`   Time: ${logEntry.executionTime}\n`);
+      ('\n✅ SUCCESS:', logEntry.message);
+      (`   Service: ${logEntry.service}`);
+      (`   Time: ${logEntry.executionTime}\n`);
     } else {
-      console.log(JSON.stringify(logEntry));
+      (JSON.stringify(logEntry));
     }
   }
 

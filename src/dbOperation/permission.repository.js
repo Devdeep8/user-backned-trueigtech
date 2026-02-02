@@ -1,7 +1,8 @@
-import { Permission } from "../model/index.js";
+import { db,  } from "../model/index.js";
+const {user , permission , game , role , rolePermission} = db
 class PermissionRepository {
   constructor() {
-    this.Permission = Permission;
+    this.Permission = permission;
   }
   async getAllPermissions() {
     return await this.Permission.findAll();

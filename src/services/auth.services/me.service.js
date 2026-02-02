@@ -3,13 +3,14 @@ import { BaseService } from "../base.service.js";
 class CurrnetUserService extends BaseService {
   async run() {
     const { userId } = this.args;
+
     try {
       const user = await this.db.user.findByPk(userId, {
         attributes: ["id", "name", "email", "isActive"],
         include: [
           {
             model: this.db.role,
-            as: "userRole",
+            as: "role",
             attributes: ["id", "name"],
             include: [
               {

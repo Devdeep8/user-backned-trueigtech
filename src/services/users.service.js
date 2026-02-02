@@ -31,7 +31,7 @@ class UserService {
     }
 
     // 2️⃣ If role is being updated
-    if (data.role && data.role !== user.userRole.name) {
+    if (data.role && data.role !== user.role.name) {
       // 3️⃣ If new role is admin → invalidate refresh token
 
       data.refreshToken = null; // or undefined based on your DB

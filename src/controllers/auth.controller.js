@@ -9,6 +9,7 @@ import RegisterService from "../services/auth.services/register.service.js";
 import LogoutService from "../services/auth.services/logout.service.js";
 import CurrnetUserService from "../services/auth.services/me.service.js";
 import RefreshService from "../services/auth.services/refresh.service.js";
+import { httpStatus } from "../helper/http-status.js";
 class AuthController {
   async register(req, res, next) {
     const { name, email, password } = req.body;
@@ -63,8 +64,7 @@ class AuthController {
     // Handle success response
     setAccessTokenCookie(res, result.data.accessToken);
     setRefreshTokenCookie(res, result.data.refreshToken);
-    return res.status(200).json({...result})
-
+    return res.status(200).json({ ...result });
   }
 
   async refresh(req, res, next) {
@@ -112,6 +112,7 @@ class AuthController {
   }
 
   async logout(req, res, next) {
+
     try {
       const logoutService = new LogoutService(
         { userId: req.user.userId },
@@ -133,14 +134,8 @@ class AuthController {
       { userId: req.user.userId },
       { res },
     );
-    const user = await currnetUserService.run();
-    res.json({
-      success: true,
-      message: "User retrieved successfully",
-      data: {
-        user,
-      },
-    });
+    const result = await currnetUserService.execute();
+    return res.status(httpStatus.OK).json(result)
   }
 }
 export default new AuthController();

@@ -23,7 +23,7 @@ export class BaseService {
       // this.logSuccess();
       return this.buildSuccessResponse(result);
     } catch (error) {
-      console.log(`🟡 4 → message [base.service.js:28]`, error);
+      (`🟡 4 → message [base.service.js:28]`, error);
       let appError =
         error instanceof AppError
           ? error
@@ -39,7 +39,7 @@ export class BaseService {
         appError.service = this.serviceName;
       }
 
-      // this.logError(appError.message);
+      this.logError(appError.message);
 
       throw error;
     }
@@ -75,7 +75,7 @@ export class BaseService {
    * Log success for monitoring
    */
   logSuccess(message = "Operation successful") {
-    console.log(`[${this.serviceName}] ✓ Success`, {
+    (`[${this.serviceName}] ✓ Success`, {
       message: message,
       service: this.serviceName,
       executionTime: `${Date.now() - this.startTime}ms`,

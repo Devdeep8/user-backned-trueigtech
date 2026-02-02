@@ -83,7 +83,7 @@ userRouter.get("/:id", async (req, res) => {
 
     // 🔹 Compare with browser cache
     if (req.headers["if-none-match"] === etag) {
-      console.log("🟡 Cache HIT → 304");
+      ("🟡 Cache HIT → 304");
       return res.status(304).json({
         status: "OK",
         data: user,
@@ -91,7 +91,7 @@ userRouter.get("/:id", async (req, res) => {
       });
     }
 
-    console.log("🟢 Cache MISS → 200");
+    ("🟢 Cache MISS → 200");
 
     // 🔹 Set cache headers
     res.setHeader("ETag", etag);

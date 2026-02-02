@@ -1,17 +1,18 @@
-import { User, Role, Permission } from "../model/index.js";
+import { db,  } from "../model/index.js";
+const {user , permission , role } = db
 class UserRepository {
   constructor() {
-    this.User = User;
+    this.user = user;
   }
 
   async getUserById(id) {
-    return await this.User.findByPk(id, {
+    return await this.user.findByPk(id, {
       include: [
         {
-          model: Role,
+          model: role,
           include: [
             {
-              model: Permission,
+              model: permission,
               through: { attributes: [] },
             },
           ],
@@ -21,16 +22,16 @@ class UserRepository {
   }
 
   async getUserByIdentifier(where) {
-    return await this.User.findOne({
+    return await this.user.findOne({
       where,
       attributes: ["id", "name", "email", "isActive" , "refreshToken"], // only needed user fields
       include: [
         {
-          model: Role,
+          model: role,
           attributes: ["name"], // only role name
           include: [
             {
-              model: Permission,
+              model: permission,
               attributes: ["key"], // only permission key
               through: { attributes: [] }, // remove join table attributes
             },
@@ -41,20 +42,20 @@ class UserRepository {
   }
 
   async createUser(data) {
-    const user = await this.User.create(data);
+    const user = await this.user.create(data);
 
     // Fetch the created user with Role included (same format as other methods)
     return await this.getUserByIdentifier({ id: user.id });
   }
 
   async getAllUsers() {
-    return await this.User.findAll({
+    return await this.user.findAll({
       include: [
         {
-          model: Role,
+          model: role,
           include: [
             {
-              model: Permission,
+              model: permission,
               through: { attributes: [] },
             },
           ],
@@ -65,12 +66,12 @@ class UserRepository {
   }
 
   async updateUser(id, data) {
-    const user = await this.User.update(data, { where: { id } });
+    const user = await this.user.update(data, { where: { id } });
     return user;
   }
 
   async softDeleteUser(id) {
-    return await this.User.update({ deletedAt: new Date() }, { where: { id } });
+    return await this.user.update({ deletedAt: new Date() }, { where: { id } });
   }
 }
 export default new UserRepository();

@@ -1,5 +1,5 @@
 import { DataTypes } from "@sequelize/core";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../config/database.js";
 
 export const RolePermission = sequelize.define(
   "RolePermission",

@@ -4,7 +4,7 @@ import {User} from '../../model/user.model.js';
 export const handleUserCreated = async (data) => {
   // Simulate a slow DB save to see RabbitMQ behavior
   // If you send 100 requests, they will queue up here.
-  console.log(`... Saving ${data.name} to DB`);
+  (`... Saving ${data.name} to DB`);
   
   // Check duplicates
   const exists = await User.findOne({ where: { email: data.email } });

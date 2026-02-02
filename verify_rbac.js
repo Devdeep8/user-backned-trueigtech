@@ -1,5 +1,5 @@
 import { User, Role, Permission } from "./src/model/index.js";
-import { sequelize } from "./src/config/db.js";
+import { sequelize } from "./src/config/database.js";
 
 async function verify() {
   try {
@@ -30,7 +30,7 @@ async function verify() {
       include: [
         {
           model: Role,
-          as: "userRole", // Check alias from index.js
+          as: "role", // Check alias from index.js
         },
       ],
     });
@@ -39,7 +39,7 @@ async function verify() {
       console.log(`Found a User: ${user.email}`);
       console.log(`- roleId: ${user.roleId}`);
       console.log(
-        `- Role Association: ${user.userRole ? user.userRole.name : "NULL (Association working but no role assigned)"}`,
+        `- Role Association: ${user.role ? user.role.name : "NULL (Association working but no role assigned)"}`,
       );
     } else {
       console.log("No users found to test association.");

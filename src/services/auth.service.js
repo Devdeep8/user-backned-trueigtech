@@ -1,4 +1,3 @@
-import { User } from "../model/index.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import AppError from "../utils/appError.js";
@@ -66,7 +65,7 @@ class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.userRole.name,
+        role: user.role.name,
       },
       accessToken,
       refreshToken,
@@ -84,7 +83,7 @@ class AuthService {
     if (!isPasswordValid) {
       throw new AppError("Invalid password", 401);
     }
-    const accessToken = this.generateAccessToken(user.id, user.userRole.name);
+    const accessToken = this.generateAccessToken(user.id, user.role.name);
     const refreshToken = this.generateRefreshToken(user.id);
     const refreshTokenExpiresAt = new Date(
       Date.now() + 7 * 24 * 60 * 60 * 1000,
@@ -104,7 +103,7 @@ class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.userRole.name,
+        role: user.role.name,
       },
       accessToken,
       refreshToken,
@@ -141,7 +140,7 @@ class AuthService {
     }
 
     // Generate new tokens
-    const accessToken = this.generateAccessToken(user.id, user.userRole.name);
+    const accessToken = this.generateAccessToken(user.id, user.role.name);
     const refreshToken = this.generateRefreshToken(user.id);
 
     // Update refresh token

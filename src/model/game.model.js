@@ -1,7 +1,6 @@
-// models/Game.js
 import { DataTypes } from "@sequelize/core";
-import { sequelize } from "../config/db.js";
-export const Games = sequelize.define(
+import { sequelize } from "../config/database.js";
+export const Game = sequelize.define(
   "Game",
   {
     // 1. ID (handled by Sequelize by default, but explicit here)
@@ -46,11 +45,6 @@ export const Games = sequelize.define(
       allowNull: true,
       defaultValue: 0.0,
       comment: "Average rating of the game (0.00 to 5.00)",
-    },
-    // 8. Deleted At (For Soft Delete)
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
     },
   },
   {

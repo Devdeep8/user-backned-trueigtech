@@ -22,7 +22,6 @@ class UserController {
   async getAllUsers(req, res, next) {
     try {
       const users = await userService.getAllUsers();
-
       res.status(200).json({
         success: true,
         message: "Users retrieved successfully",

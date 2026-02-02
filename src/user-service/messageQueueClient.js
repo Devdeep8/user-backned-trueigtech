@@ -20,7 +20,7 @@ class MessageQueueClient {
     try {
       this.connection = await amqplib.connect(RABBITMQ_URL);
       this.channel = await this.connection.createChannel();
-      console.log('✅ [MQ Client] Connected to RabbitMQ');
+      ('✅ [MQ Client] Connected to RabbitMQ');
       return this.channel;
     } catch (error) {
       console.error('❌ [MQ Client] Connection failed:', error);
@@ -39,7 +39,7 @@ class MessageQueueClient {
       
       const sent = channel.sendToQueue(queueName, content);
       if (sent) {
-        console.log(`📤 [MQ Client] Published event "${event.type}" to ${queueName}`);
+        (`📤 [MQ Client] Published event "${event.type}" to ${queueName}`);
       }
     } catch (error) {
       console.error('❌ [MQ Client] Publish failed:', error);

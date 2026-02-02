@@ -1,4 +1,5 @@
-import { Role, Permission } from "../model/index.js";
+import { db,  } from "../model/index.js";
+const {User , Permission , Game , Role , RolePermission} = db
 class RoleRepository {
   constructor() {
     this.Role = Role;

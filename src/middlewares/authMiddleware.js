@@ -28,7 +28,7 @@ class AuthMiddleware {
   async authenticate(req, res, next) {
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
-    // console.log(accessToken , "1");
+    // (accessToken , "1");
     if (!refreshToken){
         return res.status(401).json({ message: "refresh token is not their" });
     }
@@ -46,17 +46,22 @@ class AuthMiddleware {
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
+
+      
       
       // Attach user from JWT
       req.user = {
-        userId: decoded.userId,
-        role: decoded.role,
-        name: decoded.name,
-        email: decoded.email,
-        permissions: user.userRole.permissions?.map((p) => p.key) || [],
+        userId: user.id,
+        role: user.role.name,
+        name: user.name,
+        email: user.email,
+        permissions: user.role.permissions?.map((p) => p.key) || [],
       };
+
+
+
       
-      // console.log("middleware 1 run")
+      // ("middleware 1 run")
       return next();
     } catch (err) {
       return this.handleRefresh(req, res, next);
@@ -67,7 +72,7 @@ class AuthMiddleware {
   // REFRESH HANDLER
   // ===============================
   async handleRefresh(req, res, next) {
-    console.log("Start");
+    ("Start");
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
@@ -101,23 +106,23 @@ class AuthMiddleware {
         throw new AppError("Refresh does not match with Db" , httpStatus.UNAUTHORIZED , {type: "login in another browser"} , "authmiddleware")
       }
 
+
       // Rotate access token
       const newAccessToken = tokenService.createAccessToken({
         userId: user.id,
-        role: user.userRole.name,
+        role: user.role.name,
       });
       setAccessTokenCookie(res, newAccessToken);
 
       // Attach full user with permissions
       req.user = {
         userId: user.id,
-        role: user.userRole.name,
+        role: user.role.name,
         name: user.name,
         email: user.email,
-        permissions: user.userRole.permissions?.map((p) => p.key) || [],
+        permissions: user.role.permissions?.map((p) => p.key) || [],
       };
 
-      // console.log("middleware 2 run")
 
       return next();
     } catch (err) {

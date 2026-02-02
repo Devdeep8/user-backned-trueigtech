@@ -28,7 +28,7 @@ export class GenericGetService extends BaseService {
       where.createdAt = { [Op.between]: [dateRange.dateFrom, dateRange.dateTo] };
     }
 
-    console.log(`🟡 date → daterange [genericGetAPi.js:32]`, dateRange);
+    (`🟡 date → daterange [genericGetAPi.js:32]`, dateRange);
 
     const order = [[sort.by, sort.order]];
 
@@ -89,7 +89,7 @@ export class GenericGetService extends BaseService {
 
     /* 1️⃣ WHERE */
     const { whereClause, replacements } = await this.buildSqlWhere(where);
-    console.log(whereClause, replacements, "debug");
+    (whereClause, replacements, "debug");
 
     /* 2️⃣ SELECT columns */
     const selectColumns =
@@ -130,7 +130,7 @@ export class GenericGetService extends BaseService {
       type: QueryTypes.SELECT,
     });
 
-    console.log(data, "debug");
+    (data, "debug");
 
     return {
       meta: {

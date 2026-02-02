@@ -39,7 +39,7 @@ class LoginService extends BaseService {
       include: [
         {
           model: this.db.role,
-          as: "userRole",
+          as: "role",
           include: [
             {
               model: this.db.permission,
@@ -63,9 +63,10 @@ class LoginService extends BaseService {
 
     // Generate tokens
     const tokenService = new TokenService(config);
+    ("Dv"  , user)
     const payload = {
       userId: user.id,
-      role: user.userRole.name,
+      role: user.role.name,
     };
 
     const accessToken = tokenService.createAccessToken(payload);
@@ -83,7 +84,7 @@ class LoginService extends BaseService {
       user: {
         id: user.id,
         email: user.email,
-        role: user.userRole.name,
+        role: user.role.name,
       },
       accessToken,
       refreshToken,

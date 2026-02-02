@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
-import { connectDB } from "./config/db.js";
+import { connectDB } from "./config/database.js";
 import { associateModels } from "./model/index.js";
 import { userRouter } from "./routes/user.routes/route.js";
 import gameRoutes from "./routes/gameRoutes.js";
